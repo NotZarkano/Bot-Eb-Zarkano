@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 import { commands } from "./commands/index.js";
 import { getConfig } from "./config.js";
 import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
+import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 
 const { token } = getConfig();
 const client = new Client({
@@ -15,6 +16,26 @@ client.once(Events.ClientReady, (readyClient) => {
 client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (interaction.isButton()) {
+    try {
+      await handleWelcomeButton(interaction);
+    } catch (error) {
+      console.error("Erro ao processar botão da mensagem de boas-vindas:", error);
+
+      const response = {
+        content: "Não foi possível processar esse botão agora.",
+        ephemeral: true,
+      };
+
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(response);
+      } else {
+        await interaction.reply(response);
+      }
+    }
+    return;
+  }
+
   if (!interaction.isChatInputCommand()) {
     return;
   }
