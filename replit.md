@@ -30,6 +30,7 @@ Bot do Discord baseado em Node.js e discord.js, com comandos slash carregados de
 - `apps/eb-zarkano/src/commands/` — comandos slash do bot
 - `apps/eb-zarkano/src/config/channels.js` — IDs centralizados dos canais do servidor
 - `apps/eb-zarkano/src/events/guildMemberAdd.js` — mensagem automática de boas-vindas
+- `apps/eb-zarkano/src/services/welcomeMessage.js` — envio compartilhado da mensagem de boas-vindas
 - `apps/eb-zarkano/src/register-commands.js` — registro dos comandos na aplicação Discord
 - `apps/eb-zarkano/src/config.js` — validação das variáveis de ambiente
 
@@ -42,7 +43,7 @@ Bot do Discord baseado em Node.js e discord.js, com comandos slash carregados de
 
 ## Product
 
-O EB Zarkano responde aos comandos slash `/ping` e `/zarkano`, com base pronta para novos comandos independentes.
+O EB Zarkano responde aos comandos slash `/ping`, `/zarkano` e `/teste-boasvindas`, além de enviar boas-vindas automaticamente para novos membros.
 
 ## User preferences
 
@@ -52,6 +53,7 @@ Nenhuma preferência adicional registrada.
 
 - Depois de adicionar ou alterar comandos, execute `pnpm --filter @workspace/eb-zarkano run register` para sincronizá-los com o Discord.
 - Para ativar as boas-vindas, preencha `channelIds.boasVindas` em `apps/eb-zarkano/src/config/channels.js` e ative o Server Members Intent no Discord Developer Portal.
+- O comando `/teste-boasvindas` exige a permissão Gerenciar servidor e envia uma prévia sem criar um novo membro.
 
 ## Pointers
 

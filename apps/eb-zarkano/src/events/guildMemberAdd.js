@@ -1,33 +1,17 @@
-import { getConfiguredChannelId } from "../config/channels.js";
+import { sendWelcomeMessage } from "../services/welcomeMessage.js";
 
 export async function handleGuildMemberAdd(member) {
-  const welcomeChannelId = getConfiguredChannelId("boasVindas");
-
-  if (!welcomeChannelId) {
-    console.warn(
-      "Canal de boas-vindas não configurado. Preencha channelIds.boasVindas em src/config/channels.js.",
-    );
-    return;
-  }
-
   try {
-    const welcomeChannel =
-      await member.guild.channels.fetch(welcomeChannelId);
+    const result = await sendWelcomeMessage({
+      guild: member.guild,
+      member,
+    });
 
-    if (!welcomeChannel || typeof welcomeChannel.send !== "function") {
-      console.warn(
-        `O canal configurado para boas-vindas não é um canal de texto válido: ${welcomeChannelId}.`,
-      );
+    if (!result.sent) {
+      console.warn(result.reason);
       return;
     }
-
-    await welcomeChannel.send(
-      `Seja bem-vindo(a), ${member}, ao servidor! Esperamos que você aproveite a comunidade.`,
-    );
   } catch (error) {
-    console.error(
-      `Não foi possível enviar a mensagem de boas-vindas no canal ${welcomeChannelId}:`,
-      error,
-    );
+    console.error("Não foi possível enviar a mensagem de boas-vindas:", error);
   }
 }
