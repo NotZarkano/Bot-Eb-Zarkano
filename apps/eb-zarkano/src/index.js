@@ -4,6 +4,7 @@ import { getConfig } from "./config.js";
 import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
 import { handleTicketButton } from "./handlers/ticketButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
+import { ensureInformationPanel } from "./services/informationSystem.js";
 import { ensureTicketPanel } from "./services/ticketSystem.js";
 
 const { token } = getConfig();
@@ -18,6 +19,12 @@ client.once(Events.ClientReady, async (readyClient) => {
     await ensureTicketPanel(readyClient);
   } catch (error) {
     console.error("Não foi possível preparar o painel de tickets:", error);
+  }
+
+  try {
+    await ensureInformationPanel(readyClient);
+  } catch (error) {
+    console.error("Não foi possível preparar o painel de informações:", error);
   }
 });
 
