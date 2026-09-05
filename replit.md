@@ -28,13 +28,16 @@ Bot do Discord baseado em Node.js e discord.js, com comandos slash carregados de
 
 - `apps/eb-zarkano/src/index.js` — conexão do cliente e roteamento de interações
 - `apps/eb-zarkano/src/commands/` — comandos slash do bot
+- `apps/eb-zarkano/src/config/channels.js` — IDs centralizados dos canais do servidor
+- `apps/eb-zarkano/src/events/guildMemberAdd.js` — mensagem automática de boas-vindas
 - `apps/eb-zarkano/src/register-commands.js` — registro dos comandos na aplicação Discord
 - `apps/eb-zarkano/src/config.js` — validação das variáveis de ambiente
 
 ## Architecture decisions
 
 - Os comandos são registrados globalmente pela API do Discord, então não é necessário manter um servidor específico configurado.
-- O bot usa apenas a intent `Guilds`, reduzindo permissões e evitando acesso desnecessário ao conteúdo das mensagens.
+- O bot usa as intents `Guilds` e `GuildMembers`, sem habilitar acesso ao conteúdo das mensagens.
+- A intent `GuildMembers` é usada somente para detectar novas entradas e enviar boas-vindas.
 - O token e o Application ID são lidos exclusivamente dos Secrets do Replit.
 
 ## Product
@@ -48,6 +51,7 @@ Nenhuma preferência adicional registrada.
 ## Gotchas
 
 - Depois de adicionar ou alterar comandos, execute `pnpm --filter @workspace/eb-zarkano run register` para sincronizá-los com o Discord.
+- Para ativar as boas-vindas, preencha `channelIds.boasVindas` em `apps/eb-zarkano/src/config/channels.js` e ative o Server Members Intent no Discord Developer Portal.
 
 ## Pointers
 

@@ -1,15 +1,18 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { commands } from "./commands/index.js";
 import { getConfig } from "./config.js";
+import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
 
 const { token } = getConfig();
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
 client.once(Events.ClientReady, (readyClient) => {
   console.info(`EB Zarkano conectado como ${readyClient.user.tag}.`);
 });
+
+client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) {
