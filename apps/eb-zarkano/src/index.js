@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 import { commands } from "./commands/index.js";
 import { getConfig } from "./config.js";
 import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
+import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleTicketButton } from "./handlers/ticketButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
@@ -35,9 +36,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
     try {
       const welcomeButtonHandled = await handleWelcomeButton(interaction);
 
-      if (!welcomeButtonHandled) {
-        await handleTicketButton(interaction);
+      if (welcomeButtonHandled) {
+        return;
       }
+
+      const informationButtonHandled = await handleInformationButton(interaction);
+
+      if (informationButtonHandled) {
+        return;
+      }
+
+      await handleTicketButton(interaction);
     } catch (error) {
       console.error("Erro ao processar botão interativo:", error);
 

@@ -9,97 +9,90 @@ import { getConfiguredChannelId } from "../config/channels.js";
 
 const EB_ZARKANO_GREEN = 0x8fc63f;
 const INFORMATION_PANEL_FOOTER = "EB Zarkano • Painel de informações";
+export const informationButtonIds = Object.freeze({
+  rules: "information:rules",
+});
 
-function getChannelMention(channelKey, fallback) {
-  const channelId = getConfiguredChannelId(channelKey);
-  return channelId ? `<#${channelId}>` : fallback;
+const informationLinks = Object.freeze({
+  ebWebsite: "https://www.eb.mil.br/",
+  robloxGroup: "https://www.roblox.com/communities",
+  game: "https://www.roblox.com/games",
+  constitution:
+    "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm",
+});
+
+function createLinkButton(label, emoji, url) {
+  return new ButtonBuilder()
+    .setLabel(label)
+    .setEmoji(emoji)
+    .setStyle(ButtonStyle.Link)
+    .setURL(url);
 }
 
-function getChannelUrl(guildId, channelKey) {
-  const channelId = getConfiguredChannelId(channelKey);
-  return channelId
-    ? `https://discord.com/channels/${guildId}/${channelId}`
-    : null;
+function createNavigationButtons() {
+  return [
+    new ActionRowBuilder().addComponents(
+      createLinkButton("Site do EB", "🌐", informationLinks.ebWebsite),
+    ),
+    new ActionRowBuilder().addComponents(
+      createLinkButton(
+        "Grupo do Roblox",
+        "☑️",
+        informationLinks.robloxGroup,
+      ),
+      createLinkButton("Jogo", "🎮", informationLinks.game),
+    ),
+    new ActionRowBuilder().addComponents(
+      createLinkButton(
+        "Constituição",
+        "📜",
+        informationLinks.constitution,
+      ),
+      new ButtonBuilder()
+        .setCustomId(informationButtonIds.rules)
+        .setLabel("Regras")
+        .setEmoji("☑️")
+        .setStyle(ButtonStyle.Secondary),
+    ),
+  ];
 }
 
-function createNavigationButtons(guildId) {
-  const buttons = [
-    {
-      channelKey: "informacoes",
-      label: "Regras",
-      emoji: "📜",
-    },
-    {
-      channelKey: "recrutamento",
-      label: "Recrutamento",
-      emoji: "🪖",
-    },
-    {
-      channelKey: "tickets",
-      label: "Atendimento",
-      emoji: "🎫",
-    },
-  ]
-    .map(({ channelKey, label, emoji }) => {
-      const url = getChannelUrl(guildId, channelKey);
-
-      if (!url) {
-        return null;
-      }
-
-      return new ButtonBuilder()
-        .setLabel(label)
-        .setEmoji(emoji)
-        .setStyle(ButtonStyle.Link)
-        .setURL(url);
-    })
-    .filter(Boolean);
-
-  return buttons.length > 0
-    ? [new ActionRowBuilder().addComponents(...buttons)]
-    : [];
-}
-
-function createInformationPanelPayload(guild) {
-  const recruitmentChannel = getChannelMention(
-    "recrutamento",
-    "o canal de recrutamento",
-  );
-  const ticketsChannel = getChannelMention(
-    "tickets",
-    "o canal de atendimento",
-  );
-
-  const embed = new EmbedBuilder()
+export function createRulesEmbed() {
+  return new EmbedBuilder()
     .setColor(EB_ZARKANO_GREEN)
-    .setTitle("⚖️ Exército Brasileiro — Informações")
-    .setDescription(
-      [
-        "A seguir você encontrará as informações necessárias para sua permanência no Exército Brasileiro.",
-        "",
-        "Leia atentamente e mantenha-se sempre comprometido com os valores da instituição.",
-        "",
-        `Para fazer parte do EB, confira ${recruitmentChannel}. Para dúvidas ou irregularidades, utilize ${ticketsChannel}.`,
-      ].join("\n"),
-    )
+    .setTitle("📜 Regras do Exército Brasileiro")
     .addFields(
       ...serverRules.map((rule) => ({
-        name: `📘 ${rule.title}`,
+        name: rule.title,
         value: rule.body,
         inline: false,
       })),
       {
-        name: "📜 Disposições Gerais",
+        name: "Disposições Gerais",
         value: generalProvisions,
         inline: false,
       },
+    )
+    .setFooter({ text: INFORMATION_PANEL_FOOTER });
+}
+
+function createInformationPanelPayload() {
+  const embed = new EmbedBuilder()
+    .setColor(EB_ZARKANO_GREEN)
+    .setTitle("Exército Brasileiro - Informações")
+    .setDescription(
+      [
+        "A seguir, você encontrará as informações necessárias para sua permanência no Exército Brasileiro.",
+        "",
+        "Leia atentamente e mantenha-se sempre comprometido com os valores da instituição.",
+      ].join("\n"),
     )
     .setFooter({ text: INFORMATION_PANEL_FOOTER })
     .setTimestamp();
 
   return {
     embeds: [embed],
-    components: createNavigationButtons(guild.id),
+    components: createNavigationButtons(),
   };
 }
 
@@ -131,14 +124,17 @@ export async function ensureInformationPanel(client) {
   );
 
   if (existingPanel) {
+    await existingPanel.edit(
+      createInformationPanelPayload(informationChannel.guild),
+    );
     console.info(
-      `Painel de informações encontrado em #${informationChannel.name}.`,
+      `Painel de informações atualizado em #${informationChannel.name}.`,
     );
     return { created: false, message: existingPanel };
   }
 
   const panelMessage = await informationChannel.send(
-    createInformationPanelPayload(informationChannel.guild),
+    createInformationPanelPayload(),
   );
   console.info(
     `Painel de informações criado em #${informationChannel.name}.`,
