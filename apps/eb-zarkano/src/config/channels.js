@@ -5,11 +5,11 @@
  * Os próximos sistemas poderão reutilizar este mesmo arquivo.
  */
 export const channelIds = Object.freeze({
-  boasVindas: "",
-  informacoes: "",
-  logs: "",
-  recrutamento: "",
-  tickets: "",
+  boasVindas: "1545913570011775066",
+  informacoes: "1545913532833333350",
+  logs: "1545913410842009680",
+  recrutamento: "1545913461702266900",
+  tickets: "1545913614769324132",
 });
 
 export function getConfiguredChannelId(channelKey) {
