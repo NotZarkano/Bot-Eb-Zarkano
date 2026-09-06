@@ -1,15 +1,16 @@
 import {
   ChannelType,
   PermissionFlagsBits,
+  PermissionsBitField,
   SlashCommandBuilder,
 } from "discord.js";
 
-const lockedChannelPermissions = {
-  SendMessages: false,
-  SendMessagesInThreads: false,
-  CreatePublicThreads: false,
-  CreatePrivateThreads: false,
-};
+const LOCKED_BITS = new PermissionsBitField([
+  PermissionsBitField.Flags.SendMessages,
+  PermissionsBitField.Flags.SendMessagesInThreads,
+  PermissionsBitField.Flags.CreatePublicThreads,
+  PermissionsBitField.Flags.CreatePrivateThreads,
+]).bitfield;
 
 export const data = new SlashCommandBuilder()
   .setName("trancar")
@@ -45,26 +46,48 @@ export async function execute(interaction) {
 
   const { guild, channel } = interaction;
 
-  await channel.permissionOverwrites.edit(
-    guild.roles.everyone,
-    lockedChannelPermissions,
-    { reason: `Canal trancado por ${interaction.user.tag}` },
+  const nonAdministratorRoleIds = new Set(
+    guild.roles.cache
+      .filter(
+        (role) =>
+          role.id !== guild.roles.everyone.id &&
+          !role.managed &&
+          !role.permissions.has(PermissionFlagsBits.Administrator),
+      )
+      .map((role) => role.id),
   );
 
-  const nonAdministratorRoles = guild.roles.cache.filter(
-    (role) =>
-      role.id !== guild.roles.everyone.id &&
-      !role.managed &&
-      !role.permissions.has(PermissionFlagsBits.Administrator),
-  );
+  const targetIds = new Set([guild.roles.everyone.id, ...nonAdministratorRoleIds]);
 
-  for (const role of nonAdministratorRoles.values()) {
-    await channel.permissionOverwrites.edit(
-      role,
-      lockedChannelPermissions,
-      { reason: `Canal trancado por ${interaction.user.tag}` },
-    );
+  const existingOverwrites = channel.permissionOverwrites.cache;
+
+  const overwritesPayload = [];
+
+  for (const targetId of targetIds) {
+    const existing = existingOverwrites.get(targetId);
+    const currentAllow = existing ? existing.allow.bitfield : 0n;
+    const currentDeny = existing ? existing.deny.bitfield : 0n;
+
+    overwritesPayload.push({
+      id: targetId,
+      type: 0,
+      allow: (currentAllow & ~LOCKED_BITS).toString(),
+      deny: (currentDeny | LOCKED_BITS).toString(),
+    });
   }
+
+  for (const [id, overwrite] of existingOverwrites) {
+    if (!targetIds.has(id)) {
+      overwritesPayload.push({
+        id,
+        type: overwrite.type,
+        allow: overwrite.allow.bitfield.toString(),
+        deny: overwrite.deny.bitfield.toString(),
+      });
+    }
+  }
+
+  await channel.permissionOverwrites.set(overwritesPayload, `Canal trancado por ${interaction.user.tag}`);
 
   await interaction.editReply({
     content: "🔒 Este canal foi trancado. Apenas administradores podem conversar aqui.",
