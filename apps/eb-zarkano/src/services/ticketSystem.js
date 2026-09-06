@@ -7,6 +7,7 @@ import {
   PermissionFlagsBits,
 } from "discord.js";
 import { getConfiguredChannelId } from "../config/channels.js";
+import { getConfiguredRoleId } from "../config/roles.js";
 
 const TICKET_OWNER_PREFIX = "eb-zarkano-ticket-owner:";
 const TICKET_ASSIGNEE_SEPARATOR = "|assignee:";
@@ -22,6 +23,20 @@ export const ticketButtonIds = Object.freeze({
 function getChannelMention(channelKey, fallback) {
   const channelId = getConfiguredChannelId(channelKey);
   return channelId ? `<#${channelId}>` : fallback;
+}
+
+function isStaffMember(interaction) {
+  if (interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+    return true;
+  }
+
+  const staffRoleId = getConfiguredRoleId("staff");
+
+  if (!staffRoleId) {
+    return false;
+  }
+
+  return interaction.member?.roles?.cache?.has(staffRoleId) ?? false;
 }
 
 function createTicketPanelPayload() {
@@ -273,13 +288,9 @@ export async function assumeTicket(interaction) {
     return;
   }
 
-  const isStaff = interaction.memberPermissions?.has(
-    PermissionFlagsBits.ManageChannels,
-  );
-
-  if (!isStaff) {
+  if (!isStaffMember(interaction)) {
     await interaction.reply({
-      content: "Apenas Staff+ pode assumir um ticket.",
+      content: "Apenas a Staff pode assumir um ticket.",
       ephemeral: true,
     });
     return;
@@ -341,11 +352,8 @@ export async function closeTicket(interaction) {
 
   const ownerId = getTicketOwnerId(channel);
   const isOwner = ownerId === interaction.user.id;
-  const isStaff = interaction.memberPermissions?.has(
-    PermissionFlagsBits.ManageChannels,
-  );
 
-  if (!isOwner && !isStaff) {
+  if (!isOwner && !isStaffMember(interaction)) {
     await interaction.reply({
       content: "Apenas o dono do ticket ou a equipe responsável pode fechá-lo.",
       ephemeral: true,

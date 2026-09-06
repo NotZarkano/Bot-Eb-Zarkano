@@ -2,10 +2,15 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 import { commands } from "./commands/index.js";
 import { getConfig } from "./config.js";
 import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
+import { handleGuildMemberRemove } from "./events/guildMemberRemove.js";
 import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleTicketButton } from "./handlers/ticketButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 import { startKeepAliveServer } from "./keepAlive.js";
+import {
+  enforceRoleExclusivity,
+  startMembershipProgressionScheduler,
+} from "./services/membershipProgression.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
 import { ensureTicketPanel } from "./services/ticketSystem.js";
 
@@ -33,9 +38,20 @@ client.once(Events.ClientReady, async (readyClient) => {
   } catch (error) {
     console.error("Não foi possível preparar o painel de informações:", error);
   }
+
+  startMembershipProgressionScheduler(readyClient);
 });
 
 client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
+client.on(Events.GuildMemberRemove, handleGuildMemberRemove);
+
+client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
+  try {
+    await enforceRoleExclusivity(newMember);
+  } catch (error) {
+    console.error("Não foi possível reforçar a exclusividade de cargos:", error);
+  }
+});
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (interaction.isButton()) {

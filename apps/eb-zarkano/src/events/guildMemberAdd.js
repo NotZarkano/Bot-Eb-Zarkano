@@ -1,9 +1,12 @@
+import { assignInitialMembroRole } from "../services/membershipProgression.js";
 import { sendWelcomeMessage } from "../services/welcomeMessage.js";
 
 const recentWelcomeEvents = new Map();
 const DUPLICATE_WINDOW_MS = 60_000;
 
 export async function handleGuildMemberAdd(member) {
+  await assignInitialMembroRole(member);
+
   const eventKey = `${member.guild.id}:${member.id}`;
   const now = Date.now();
   const previousEventExpiresAt = recentWelcomeEvents.get(eventKey);
