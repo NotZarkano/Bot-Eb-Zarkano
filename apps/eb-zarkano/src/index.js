@@ -6,6 +6,7 @@ import { handleMessageCreate } from "./events/messageCreate.js";
 import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleTicketButton } from "./handlers/ticketButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
+import { startKeepAliveServer } from "./keepAlive.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
 import { ensureTicketPanel } from "./services/ticketSystem.js";
 
@@ -116,5 +117,7 @@ process.on("SIGTERM", () => {
   client.destroy();
   process.exit(0);
 });
+
+startKeepAliveServer();
 
 await client.login(token);

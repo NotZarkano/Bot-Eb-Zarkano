@@ -1,7 +1,11 @@
 import { EmbedBuilder, PermissionFlagsBits } from "discord.js";
-import { getConfiguredChannelId } from "../config/channels.js";
 import { antiSpamConfig } from "../config/antiSpam.js";
-import { isModerationDisabled } from "./moderationState.js";
+import {
+  getModerationLogChannelId,
+  isModerationIgnored,
+} from "./moderationState.js";
+import { recordInfraction } from "./moderationHistory.js";
+import { applyProgressiveTimeout } from "./moderationActions.js";
 
 const URL_PATTERN = /https?:\/\/[^\s<>()]+/gi;
 const repeatedCharacterPattern = /([^\s])\1{7,}/u;
@@ -250,8 +254,14 @@ async function sendPrivateWarning(message, state) {
   }
 }
 
-async function sendAntiSpamLog(message, analysis, deletedCount, warningSent) {
-  const logsChannelId = getConfiguredChannelId("logs");
+async function sendAntiSpamLog(
+  message,
+  analysis,
+  deletedCount,
+  warningSent,
+  timeoutApplied,
+) {
+  const logsChannelId = await getModerationLogChannelId();
 
   if (!logsChannelId) {
     return;
@@ -273,6 +283,7 @@ async function sendAntiSpamLog(message, analysis, deletedCount, warningSent) {
         { name: "Risk score", value: String(analysis.riskScore), inline: true },
         { name: "Mensagens apagadas", value: String(deletedCount), inline: true },
         { name: "Aviso enviado", value: warningSent ? "Sim" : "Não", inline: true },
+        { name: "Timeout aplicado", value: timeoutApplied ? "Sim" : "Não", inline: true },
         {
           name: "Indicadores",
           value: analysis.signals.join("\n") || "Nenhum indicador informado",
@@ -307,7 +318,7 @@ export async function handleAntiSpamMessage(message) {
   if (
     !antiSpamConfig.enabled ||
     shouldIgnoreMessage(message) ||
-    (await isModerationDisabled(message.channel.id))
+    (await isModerationIgnored(message))
   ) {
     return;
   }
@@ -335,6 +346,25 @@ export async function handleAntiSpamMessage(message) {
     ? await deleteSpamMessages(message, analysis)
     : 0;
   const warningSent = await sendPrivateWarning(message, state);
+  const history = await recordInfraction({
+    guildId: message.guild.id,
+    userId: message.author.id,
+    channelId: message.channel.id,
+    category: "Anti-Spam",
+    score: analysis.riskScore,
+    action: deletedCount > 0 ? "mensagem removida" : "aviso",
+  });
+  const timeoutApplied = await applyProgressiveTimeout(
+    message,
+    history.occurrence,
+    "Reincidência em comportamento de spam.",
+  );
 
-  await sendAntiSpamLog(message, analysis, deletedCount, warningSent);
+  await sendAntiSpamLog(
+    message,
+    analysis,
+    deletedCount,
+    warningSent,
+    timeoutApplied,
+  );
 }
