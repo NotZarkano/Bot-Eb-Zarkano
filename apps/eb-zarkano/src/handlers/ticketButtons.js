@@ -1,4 +1,5 @@
 import {
+  assumeTicket,
   closeTicket,
   createTicket,
   ticketButtonIds,
@@ -12,6 +13,11 @@ export async function handleTicketButton(interaction) {
 
   if (interaction.customId === ticketButtonIds.close) {
     await closeTicket(interaction);
+    return true;
+  }
+
+  if (interaction.customId === ticketButtonIds.assume) {
+    await assumeTicket(interaction);
     return true;
   }
 

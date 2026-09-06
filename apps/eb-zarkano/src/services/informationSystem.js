@@ -11,14 +11,12 @@ const EB_ZARKANO_GREEN = 0x8fc63f;
 const INFORMATION_PANEL_FOOTER = "EB Zarkano • Painel de informações";
 export const informationButtonIds = Object.freeze({
   rules: "information:rules",
+  robloxGroup: "information:roblox-group",
 });
 
 const informationLinks = Object.freeze({
-  ebWebsite: "https://www.eb.mil.br/",
-  robloxGroup: "https://www.roblox.com/communities",
+  ebWebsite: "https://ebzarkano.onrender.com",
   game: "https://www.roblox.com/games",
-  constitution:
-    "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm",
 });
 
 function createLinkButton(label, emoji, url) {
@@ -35,19 +33,14 @@ function createNavigationButtons() {
       createLinkButton("Site do EB", "🌐", informationLinks.ebWebsite),
     ),
     new ActionRowBuilder().addComponents(
-      createLinkButton(
-        "Grupo do Roblox",
-        "☑️",
-        informationLinks.robloxGroup,
-      ),
+      new ButtonBuilder()
+        .setCustomId(informationButtonIds.robloxGroup)
+        .setLabel("Grupo do Roblox")
+        .setEmoji("☑️")
+        .setStyle(ButtonStyle.Secondary),
       createLinkButton("Jogo", "🎮", informationLinks.game),
     ),
     new ActionRowBuilder().addComponents(
-      createLinkButton(
-        "Constituição",
-        "📜",
-        informationLinks.constitution,
-      ),
       new ButtonBuilder()
         .setCustomId(informationButtonIds.rules)
         .setLabel("Regras")
@@ -125,7 +118,7 @@ export async function ensureInformationPanel(client) {
 
   if (existingPanel) {
     await existingPanel.edit(
-      createInformationPanelPayload(informationChannel.guild),
+      createInformationPanelPayload(),
     );
     console.info(
       `Painel de informações atualizado em #${informationChannel.name}.`,

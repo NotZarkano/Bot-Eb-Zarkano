@@ -9,12 +9,14 @@ import {
 import { getConfiguredChannelId } from "../config/channels.js";
 
 const TICKET_OWNER_PREFIX = "eb-zarkano-ticket-owner:";
+const TICKET_ASSIGNEE_SEPARATOR = "|assignee:";
 const EB_ZARKANO_GREEN = 0x8fc63f;
 const EB_ZARKANO_GOLD = 0xf2c94c;
 
 export const ticketButtonIds = Object.freeze({
   open: "tickets:open",
   close: "tickets:close",
+  assume: "tickets:assume",
 });
 
 function getChannelMention(channelKey, fallback) {
@@ -113,7 +115,38 @@ function getTicketOwnerId(channel) {
     return null;
   }
 
-  return channel.topic.slice(TICKET_OWNER_PREFIX.length);
+  return channel.topic
+    .slice(TICKET_OWNER_PREFIX.length)
+    .split(TICKET_ASSIGNEE_SEPARATOR, 1)[0];
+}
+
+function getTicketAssigneeId(channel) {
+  if (!channel.topic?.startsWith(TICKET_OWNER_PREFIX)) {
+    return null;
+  }
+
+  const assigneeId = channel.topic
+    .slice(TICKET_OWNER_PREFIX.length)
+    .split(TICKET_ASSIGNEE_SEPARATOR)[1];
+
+  return assigneeId || null;
+}
+
+function createTicketActionRow(assigneeLabel = null) {
+  const assumeButton = new ButtonBuilder()
+    .setCustomId(ticketButtonIds.assume)
+    .setLabel(assigneeLabel ? `Assumido por ${assigneeLabel}` : "Assumir ticket")
+    .setEmoji("👮")
+    .setStyle(ButtonStyle.Primary)
+    .setDisabled(Boolean(assigneeLabel));
+
+  const closeButton = new ButtonBuilder()
+    .setCustomId(ticketButtonIds.close)
+    .setLabel("Fechar ticket")
+    .setEmoji("🔒")
+    .setStyle(ButtonStyle.Danger);
+
+  return new ActionRowBuilder().addComponents(assumeButton, closeButton);
 }
 
 function createTicketChannelName(user) {
@@ -202,12 +235,6 @@ export async function createTicket(interaction) {
   }
 
   const ticketChannel = await guild.channels.create(ticketOptions);
-  const closeButton = new ButtonBuilder()
-    .setCustomId(ticketButtonIds.close)
-    .setLabel("Fechar ticket")
-    .setEmoji("🔒")
-    .setStyle(ButtonStyle.Danger);
-
   const ticketEmbed = new EmbedBuilder()
     .setColor(EB_ZARKANO_GOLD)
     .setTitle("🎫 Atendimento aberto")
@@ -216,7 +243,8 @@ export async function createTicket(interaction) {
         `${user}, seu atendimento foi criado com sucesso.`,
         "",
         "Explique com detalhes o motivo do contato e aguarde a equipe do EB Zarkano.",
-        "Quando o atendimento terminar, use o botão abaixo para fechar este ticket.",
+        "Um membro da equipe pode assumir o atendimento pelo botão abaixo.",
+        "Quando o atendimento terminar, use o botão de fechar o ticket.",
       ].join("\n"),
     )
     .setFooter({ text: "EB Zarkano • Atendimento privado" })
@@ -225,13 +253,79 @@ export async function createTicket(interaction) {
   await ticketChannel.send({
     content: `${user}`,
     embeds: [ticketEmbed],
-    components: [new ActionRowBuilder().addComponents(closeButton)],
+    components: [createTicketActionRow()],
   });
 
   await interaction.reply({
     content: `Seu ticket foi criado: ${ticketChannel}`,
     ephemeral: true,
   });
+}
+
+export async function assumeTicket(interaction) {
+  const channel = interaction.channel;
+
+  if (!channel || channel.type !== ChannelType.GuildText) {
+    await interaction.reply({
+      content: "Este botão só pode ser usado dentro de um ticket.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const isStaff = interaction.memberPermissions?.has(
+    PermissionFlagsBits.ManageChannels,
+  );
+
+  if (!isStaff) {
+    await interaction.reply({
+      content: "Apenas Staff+ pode assumir um ticket.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const currentAssigneeId = getTicketAssigneeId(channel);
+
+  if (currentAssigneeId) {
+    const currentAssignee = await interaction.guild.members
+      .fetch(currentAssigneeId)
+      .catch(() => null);
+    const assigneeMention = currentAssignee
+      ? `${currentAssignee}`
+      : `<@${currentAssigneeId}>`;
+
+    await interaction.reply({
+      content: `Este ticket já foi assumido por ${assigneeMention}.`,
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const ownerId = getTicketOwnerId(channel);
+
+  if (!ownerId) {
+    await interaction.reply({
+      content: "Não consegui identificar o dono deste ticket.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const staffLabel =
+    interaction.member?.displayName || interaction.user.username;
+  const newTopic = `${TICKET_OWNER_PREFIX}${ownerId}${TICKET_ASSIGNEE_SEPARATOR}${interaction.user.id}`;
+
+  await channel.setTopic(newTopic, `Ticket assumido por ${interaction.user.tag}`);
+  await interaction.update({
+    components: [createTicketActionRow(staffLabel)],
+  });
+
+  await channel
+    .send(`👮 ${interaction.user} assumiu este atendimento.`)
+    .catch((error) => {
+      console.error("Não foi possível registrar a assunção do ticket:", error);
+    });
 }
 
 export async function closeTicket(interaction) {
