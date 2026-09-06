@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 import { commands } from "./commands/index.js";
 import { getConfig } from "./config.js";
 import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
+import { handleMessageCreate } from "./events/messageCreate.js";
 import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleTicketButton } from "./handlers/ticketButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
@@ -10,7 +11,12 @@ import { ensureTicketPanel } from "./services/ticketSystem.js";
 
 const { token } = getConfig();
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 client.once(Events.ClientReady, async (readyClient) => {
@@ -30,6 +36,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 });
 
 client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
+client.on(Events.MessageCreate, handleMessageCreate);
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (interaction.isButton()) {
