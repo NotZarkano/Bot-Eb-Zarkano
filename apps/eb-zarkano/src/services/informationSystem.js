@@ -11,12 +11,12 @@ const EB_ZARKANO_GREEN = 0x8fc63f;
 const INFORMATION_PANEL_FOOTER = "EB Zarkano • Painel de informações";
 export const informationButtonIds = Object.freeze({
   rules: "information:rules",
-  robloxGroup: "information:roblox-group",
+  game: "information:game",
 });
 
 const informationLinks = Object.freeze({
   ebWebsite: "https://ebzarkano.onrender.com",
-  game: "https://www.roblox.com/games",
+  robloxGroup: "https://www.roblox.com/share/g/7797329",
 });
 
 function createLinkButton(label, emoji, url) {
@@ -34,11 +34,15 @@ function createNavigationButtons() {
     ),
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(informationButtonIds.robloxGroup)
         .setLabel("Grupo do Roblox")
         .setEmoji("☑️")
+        .setStyle(ButtonStyle.Link)
+        .setURL(informationLinks.robloxGroup),
+      new ButtonBuilder()
+        .setCustomId(informationButtonIds.game)
+        .setLabel("Jogo")
+        .setEmoji("🎮")
         .setStyle(ButtonStyle.Secondary),
-      createLinkButton("Jogo", "🎮", informationLinks.game),
     ),
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()

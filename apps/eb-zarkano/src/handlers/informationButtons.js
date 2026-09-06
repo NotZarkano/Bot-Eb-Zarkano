@@ -4,7 +4,7 @@ import {
 } from "../services/informationSystem.js";
 
 export async function handleInformationButton(interaction) {
-  if (interaction.customId === informationButtonIds.robloxGroup) {
+  if (interaction.customId === informationButtonIds.game) {
     await interaction.reply({
       content: "O jogo ainda está em desenvolvimento.",
       ephemeral: true,
