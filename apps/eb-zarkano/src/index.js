@@ -5,6 +5,7 @@ import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
 import { handleGuildMemberRemove } from "./events/guildMemberRemove.js";
 import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleTicketButton } from "./handlers/ticketButtons.js";
+import { handleVerificationButton } from "./handlers/verificationButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 import { startKeepAliveServer } from "./keepAlive.js";
 import {
@@ -13,6 +14,7 @@ import {
 } from "./services/membershipProgression.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
 import { ensureTicketPanel } from "./services/ticketSystem.js";
+import { ensureVerificationPanel } from "./services/verificationSystem.js";
 
 const { token } = getConfig();
 const client = new Client({
@@ -37,6 +39,12 @@ client.once(Events.ClientReady, async (readyClient) => {
     await ensureInformationPanel(readyClient);
   } catch (error) {
     console.error("Não foi possível preparar o painel de informações:", error);
+  }
+
+  try {
+    await ensureVerificationPanel(readyClient);
+  } catch (error) {
+    console.error("Não foi possível preparar o painel de verificação:", error);
   }
 
   startMembershipProgressionScheduler(readyClient);
@@ -65,6 +73,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const informationButtonHandled = await handleInformationButton(interaction);
 
       if (informationButtonHandled) {
+        return;
+      }
+
+      const verificationButtonHandled = await handleVerificationButton(interaction);
+
+      if (verificationButtonHandled) {
         return;
       }
 
