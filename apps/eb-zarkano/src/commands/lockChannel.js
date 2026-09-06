@@ -41,6 +41,8 @@ export async function execute(interaction) {
     return;
   }
 
+  await interaction.deferReply({ ephemeral: true });
+
   const { guild, channel } = interaction;
 
   await channel.permissionOverwrites.edit(
@@ -64,8 +66,7 @@ export async function execute(interaction) {
     );
   }
 
-  await interaction.reply({
+  await interaction.editReply({
     content: "🔒 Este canal foi trancado. Apenas administradores podem conversar aqui.",
-    ephemeral: true,
   });
 }
