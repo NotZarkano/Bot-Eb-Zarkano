@@ -1,0 +1,416 @@
+🛡️ Sistema de Filtro de Linguagem — EB Zarkano
+
+O sistema deve funcionar automaticamente sempre que alguém enviar uma mensagem.
+
+1. 📩 Captura da mensagem
+
+O bot monitora as mensagens enviadas nos canais configurados para moderação.
+
+Quando uma mensagem chega, o sistema verifica:
+
+* conteúdo da mensagem;
+* autor;
+* canal;
+* quantidade de mensagens recentes;
+* histórico de infrações;
+* contexto necessário para determinar a gravidade.
+
+Mensagens de bots confiáveis, cargos administrativos ou canais específicos podem receber exceções, dependendo da configuração.
+
+⸻
+
+2. 🧠 Normalização do texto
+
+Essa é uma das partes mais importantes.
+
+Antes de procurar termos proibidos, o bot transforma a mensagem em uma versão padronizada.
+
+Por exemplo, alguém pode tentar burlar o filtro utilizando:
+
+* letras maiúsculas;
+* letras minúsculas;
+* espaços;
+* pontuação;
+* números;
+* símbolos;
+* caracteres Unicode semelhantes;
+* letras repetidas;
+* separação artificial da palavra.
+
+O sistema pode transformar diferentes formas de escrita em uma representação normalizada.
+
+Isso evita que o usuário simplesmente altere alguns caracteres para escapar do filtro.
+
+Exemplo conceitual
+
+Uma determinada palavra proibida poderia aparecer com:
+
+espaços → símbolos → números → letras repetidas → Unicode
+
+O normalizador tenta identificar que todas essas versões representam essencialmente o mesmo termo.
+
+⸻
+
+3. 📚 Banco de palavras e expressões
+
+Em vez de depender de apenas 500 palavras, utilize um banco organizado por categorias e níveis de gravidade.
+
+🟢 Nível 1 — Linguagem inadequada
+
+Termos de baixo impacto ou palavrões comuns.
+
+Ação sugerida:
+
+registrar ou emitir advertência, dependendo da frequência.
+
+🟡 Nível 2 — Ofensas
+
+Insultos direcionados a outros membros.
+
+Ação:
+
+apagar a mensagem + advertência.
+
+🟠 Nível 3 — Conteúdo altamente inadequado
+
+Expressões sexualmente explícitas, extremamente ofensivas ou incompatíveis com o ambiente do servidor.
+
+Ação:
+
+apagar + advertência/punição automática + log.
+
+🔴 Nível 4 — Conteúdo crítico
+
+Conteúdo que envolva ameaças, assédio grave, incentivo a violência ou outros comportamentos extremamente inadequados.
+
+Ação:
+
+remoção imediata + registro + encaminhamento para a equipe.
+
+A equipe pode decidir a punição definitiva.
+
+⸻
+
+🔍 4. Detecção de tentativa de burlar o filtro
+
+O sistema não deve procurar somente correspondências exatas.
+
+Ele deve procurar padrões.
+
+Por exemplo, detectar tentativas como:
+
+palavra → p.a.l.a.v.r.a
+
+palavra → p a l a v r a
+
+palavra → p4l4vr4
+
+palavra → repetição exagerada de caracteres
+
+Também é possível aplicar técnicas de similaridade textual, permitindo encontrar palavras que tenham pequenas alterações.
+
+Isso é especialmente útil contra usuários que tentam descobrir maneiras de escapar do AutoMod.
+
+⸻
+
+🧩 5. Análise de contexto
+
+Essa parte torna o sistema realmente inteligente.
+
+Uma palavra isolada nem sempre significa que a mensagem é ofensiva.
+
+Por isso, o sistema pode analisar:
+
+palavra + frase + destinatário + contexto.
+
+Por exemplo, uma mensagem pode mencionar determinada palavra em um contexto educativo ou administrativo.
+
+Nesse caso, simplesmente apagar qualquer mensagem que contenha aquele termo poderia gerar muitos falsos positivos.
+
+Por isso, o filtro deve trabalhar com uma pontuação de risco.
+
+⸻
+
+📊 6. Sistema de pontuação
+
+Cada mensagem recebe uma pontuação.
+
+Por exemplo:
+
+* termo inadequado detectado → +30
+* tentativa de evasão → +20
+* insulto direcionado → +25
+* repetição → +10
+* histórico recente de infrações → +15
+* comportamento de spam → +20
+
+Quanto maior a pontuação, maior o nível de intervenção.
+
+Exemplo
+
+0–29: permitido.
+
+30–49: registrar.
+
+50–69: apagar mensagem.
+
+70–89: apagar + advertir.
+
+90+: apagar + punição automática + registrar para a equipe.
+
+Os valores seriam configuráveis pelo administrador.
+
+⸻
+
+🗑️ 7. Exclusão automática
+
+Quando a mensagem ultrapassar o limite definido, o bot remove a mensagem.
+
+O usuário não precisa receber uma mensagem pública, porque isso pode gerar ainda mais spam.
+
+Em vez disso, o bot pode enviar uma resposta efêmera/interação privada, somente para aquele usuário:
+
+⚠️ Sua mensagem foi removida automaticamente por violar as regras de linguagem do servidor.
+
+Isso é especialmente interessante para o seu caso porque os outros membros não ficam vendo uma sequência de mensagens do bot.
+
+⸻
+
+⚠️ 8. Sistema progressivo de punição
+
+Eu não recomendaria punir alguém severamente na primeira ocorrência.
+
+O bot pode utilizar um sistema progressivo.
+
+1ª ocorrência: mensagem removida.
+
+2ª ocorrência: advertência.
+
+3ª ocorrência: timeout.
+
+4ª ocorrência: timeout maior.
+
+Reincidência: encaminhamento para a administração.
+
+O sistema pode considerar um período de expiração das infrações.
+
+Por exemplo, uma infração antiga pode deixar de contar depois de determinado período, caso o usuário não cometa novas infrações.
+
+⸻
+
+🧠 9. Detecção de comportamento
+
+Além do conteúdo individual, o bot pode analisar o comportamento.
+
+Por exemplo:
+
+Um usuário manda várias mensagens inadequadas rapidamente.
+
+O sistema percebe:
+
+conteúdo inadequado + repetição + alta frequência
+
+e aumenta o nível de risco.
+
+Isso permite combinar o filtro de linguagem com o Anti-Spam.
+
+⸻
+
+📝 10. Sistema de logs
+
+Toda ação importante deve ser registrada em um canal privado de logs.
+
+O registro pode conter:
+
+* usuário;
+* ID do usuário;
+* canal;
+* horário;
+* categoria detectada;
+* nível de gravidade;
+* ação realizada;
+* pontuação de risco;
+* quantidade de infrações anteriores.
+
+O conteúdo original da mensagem deve ser tratado com cuidado e acesso restrito à equipe responsável.
+
+⸻
+
+⚙️ 11. Configuração por canal
+
+Nem todos os canais precisam ter o mesmo nível de proteção.
+
+Por exemplo:
+
+💬・chat
+
+Filtro completo.
+
+🎫・tickets
+
+Filtro completo.
+
+📢・comunicados
+
+Filtro extremamente rígido.
+
+🤖・comandos
+
+Filtro adaptado para comandos.
+
+📰・jornal
+
+Pode ter regras diferentes.
+
+Assim, a administração consegue definir o comportamento do AutoMod individualmente.
+
+⸻
+
+👮 12. Cargos com exceção
+
+Você também pode criar uma configuração para cargos autorizados.
+
+Por exemplo:
+
+Dono/Creator: bypass total.
+
+Diretoria: bypass configurável.
+
+Moderação: pode enviar determinadas mensagens sem o filtro.
+
+Membros: filtro normal.
+
+Mas eu recomendo que o bypass seja usado com cuidado. Mesmo administradores podem ter suas mensagens registradas em casos críticos.
+
+⸻
+
+🚨 13. Modo de proteção
+
+O sistema pode possuir diferentes níveis:
+
+🟢 Normal
+
+Filtro padrão.
+
+🟡 Atenção
+
+Ativado quando há aumento de infrações.
+
+O bot começa a ser mais rigoroso.
+
+🔴 Lockdown
+
+Ativado durante uma possível raid.
+
+O sistema aumenta a proteção:
+
+* filtro mais rigoroso;
+* Anti-Spam reforçado;
+* limitação de mensagens;
+* monitoramento de contas novas;
+* verificação obrigatória;
+* possibilidade de bloquear temporariamente canais.
+
+Quando a situação termina, a administração pode restaurar o modo normal.
+
+⸻
+
+📈 14. Painel administrativo por comandos
+
+A equipe poderia controlar tudo por comandos como:
+
+/automod — visualizar o status.
+
+/automod ativar — ativar.
+
+/automod desativar — desativar.
+
+/automod configurar — configurar níveis.
+
+/automod canal — definir canais protegidos.
+
+/automod exceção — configurar exceções.
+
+/automod logs — configurar registros.
+
+/infrações — consultar histórico de um usuário.
+
+/limparinfrações — remover infrações autorizadamente.
+
+⸻
+
+🔄 Funcionamento completo
+
+O fluxo final ficaria assim:
+
+Usuário envia mensagem
+
+↓
+
+Bot recebe a mensagem
+
+↓
+
+Normalização
+
+↓
+
+Detecção de tentativas de evasão
+
+↓
+
+Pesquisa no banco de termos
+
+↓
+
+Análise de contexto
+
+↓
+
+Análise do histórico do usuário
+
+↓
+
+Cálculo da pontuação de risco
+
+↓
+
+Classificação da mensagem
+
+↓
+
+Ação automática
+
+↓
+
+Mensagem removida, se necessário
+
+↓
+
+Aviso privado ao usuário
+
+↓
+
+Infração registrada
+
+↓
+
+Log enviado à administração
+
+↓
+
+Sistema atualiza o histórico do usuário
+
+⸻
+
+💡 O principal
+
+Eu faria o sistema do EB Zarkano com quatro mecanismos trabalhando juntos:
+
+Filtro de palavras → encontra termos proibidos.
+
+Normalizador → impede que o usuário burle o filtro.
+
+Análise contextual → reduz falsos positivos.
+
+Sistema de comportamento → identifica reincidência, spam e abuso.

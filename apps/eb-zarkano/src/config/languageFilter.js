@@ -1,0 +1,58 @@
+export const languageFilterConfig = Object.freeze({
+  enabled: true,
+  warningCooldownMs: 30_000,
+  historyWindowMs: 24 * 60 * 60 * 1_000,
+  maxTrackedMessagesPerUser: 30,
+  deletionRiskScore: 50,
+  warningRiskScore: 70,
+  criticalRiskScore: 90,
+  terms: Object.freeze([
+    {
+      category: "Linguagem inadequada",
+      level: 1,
+      score: 30,
+      expressions: ["idiota", "imbecil", "burro", "otario"],
+    },
+    {
+      category: "Ofensa",
+      level: 2,
+      score: 50,
+      expressions: [
+        "arrombado",
+        "babaca",
+        "fdp",
+        "filho da puta",
+        "merda",
+        "otaria",
+        "piranha",
+        "puta",
+        "puto",
+        "vadia",
+        "viado",
+      ],
+    },
+    {
+      category: "Conteúdo altamente inadequado",
+      level: 3,
+      score: 70,
+      expressions: [
+        "buceta",
+        "caralho",
+        "foder",
+        "fodase",
+        "pornografia",
+      ],
+    },
+    {
+      category: "Conteúdo crítico",
+      level: 4,
+      score: 90,
+      expressions: [
+        "eu vou te matar",
+        "vou te matar",
+        "te mato",
+        "matar voce",
+      ],
+    },
+  ]),
+});

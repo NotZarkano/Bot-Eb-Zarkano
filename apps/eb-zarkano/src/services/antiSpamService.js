@@ -1,6 +1,7 @@
 import { EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { getConfiguredChannelId } from "../config/channels.js";
 import { antiSpamConfig } from "../config/antiSpam.js";
+import { isModerationDisabled } from "./moderationState.js";
 
 const URL_PATTERN = /https?:\/\/[^\s<>()]+/gi;
 const repeatedCharacterPattern = /([^\s])\1{7,}/u;
@@ -303,7 +304,11 @@ function shouldIgnoreMessage(message) {
 }
 
 export async function handleAntiSpamMessage(message) {
-  if (!antiSpamConfig.enabled || shouldIgnoreMessage(message)) {
+  if (
+    !antiSpamConfig.enabled ||
+    shouldIgnoreMessage(message) ||
+    (await isModerationDisabled(message.channel.id))
+  ) {
     return;
   }
 
