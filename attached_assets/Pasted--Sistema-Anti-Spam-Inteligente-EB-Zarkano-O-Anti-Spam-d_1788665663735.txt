@@ -1,0 +1,151 @@
+🛡️ Sistema Anti-Spam Inteligente — EB Zarkano
+
+O Anti-Spam do bot deverá monitorar todas as mensagens enviadas no servidor em tempo real e identificar comportamentos que caracterizem spam, flood ou abuso.
+
+O sistema deverá analisar a quantidade de mensagens enviadas por cada usuário, o intervalo entre elas, a repetição do conteúdo, a similaridade entre mensagens, a quantidade de menções, o uso de @everyone e @here, a quantidade de links, caracteres e emojis repetidos, além do histórico recente de infrações do usuário.
+
+A detecção não deverá funcionar apenas através de uma regra simples como “X mensagens em Y segundos”. O sistema deverá combinar vários fatores para determinar se o comportamento realmente representa spam.
+
+Detecção de flood
+
+O bot deverá utilizar um sistema de controle de frequência para identificar quando um usuário estiver enviando mensagens em uma velocidade anormal.
+
+Pequenas sequências de mensagens rápidas não deverão necessariamente resultar em punição. O sistema deverá considerar a duração da atividade e se o comportamento continua.
+
+Detecção de mensagens repetidas
+
+O bot deverá identificar mensagens idênticas ou muito semelhantes.
+
+Por exemplo, se um usuário enviar várias vezes a mesma frase, mesmo realizando pequenas alterações como adicionar pontos de exclamação, letras repetidas ou emojis, o sistema deverá reconhecer que se trata do mesmo conteúdo.
+
+A análise poderá utilizar normalização do texto e algoritmos de similaridade para identificar essas alterações.
+
+Detecção de spam de links
+
+O sistema deverá identificar o envio excessivo de links.
+
+Deverá ser possível definir determinados domínios como permitidos, enquanto links desconhecidos ou enviados em grande quantidade poderão aumentar o nível de risco do usuário.
+
+Detecção de spam de menções
+
+O bot deverá controlar a quantidade de usuários e cargos mencionados.
+
+O uso abusivo de @everyone e @here deverá possuir uma pontuação de risco elevada.
+
+Caso o usuário esteja utilizando menções para realizar spam, a mensagem deverá ser removida automaticamente.
+
+Detecção de caracteres e emojis
+
+O sistema deverá identificar mensagens compostas por grandes quantidades de caracteres ou emojis repetidos, como mensagens contendo centenas de letras, símbolos ou emojis iguais.
+
+Essas mensagens poderão ser classificadas como flood de caracteres.
+
+🧠 Sistema de Risk Score
+
+Todos os comportamentos identificados deverão alimentar um sistema de pontuação de risco.
+
+Por exemplo, uma mensagem enviada rapidamente pode adicionar poucos pontos, enquanto uma mensagem repetida, várias menções e diversos links podem adicionar uma quantidade muito maior.
+
+O sistema deverá utilizar essa pontuação para determinar a gravidade do comportamento.
+
+Um usuário com baixo risco poderá simplesmente ter sua mensagem mantida.
+
+Um usuário com risco moderado poderá receber um aviso.
+
+Um usuário com risco alto poderá ter suas mensagens removidas e receber uma advertência ou timeout.
+
+Um comportamento crítico poderá resultar em timeout imediato ou outra punição configurada pela administração.
+
+🔔 Aviso privado
+
+Quando o bot detectar que o usuário está começando a realizar spam, deverá enviar uma mensagem visível somente para aquele usuário, quando o tipo de interação do Discord permitir uma resposta efêmera.
+
+A mensagem deverá informar que o comportamento foi identificado e pedir que o usuário pare.
+
+Por exemplo:
+
+⚠️ Pare de enviar mensagens repetidamente!
+
+Você está enviando mensagens em uma frequência muito alta.
+
+Continue realizando spam e você poderá receber uma punição automática.
+
+Sistema Anti-Spam — EB Zarkano
+
+Esse aviso deverá possuir um cooldown para evitar que o bot envie dezenas de avisos para a mesma pessoa.
+
+🧹 Exclusão automática
+
+Quando o sistema confirmar que determinada mensagem faz parte de um comportamento de spam, o bot deverá apagá-la automaticamente.
+
+O sistema deverá tentar apagar somente as mensagens relacionadas ao spam, preservando mensagens normais enviadas anteriormente pelo usuário.
+
+Por exemplo, se uma pessoa estiver conversando normalmente e depois começar a enviar a mesma mensagem várias vezes, somente as mensagens identificadas como spam deverão ser removidas.
+
+Também deverá existir um limite de segurança para a quantidade de mensagens que o bot pode apagar em uma única ação.
+
+⚖️ Punição progressiva
+
+O sistema deverá utilizar punições progressivas.
+
+Uma primeira ocorrência leve poderá gerar somente um aviso privado.
+
+Caso o usuário continue, poderá receber uma advertência.
+
+Se persistir no comportamento, poderá receber timeout.
+
+Em casos graves ou reincidentes, o sistema poderá aplicar expulsão ou banimento, dependendo das configurações definidas pela administração.
+
+A punição deverá considerar tanto a gravidade da ocorrência quanto o histórico do usuário.
+
+🚨 Anti-Raid
+
+O sistema também deverá analisar o comportamento coletivo do servidor.
+
+Caso várias contas entrem em um curto período e imediatamente comecem a enviar mensagens, realizar menções ou postar links, o bot deverá identificar uma possível raid.
+
+Nesse caso, poderá aumentar temporariamente o nível de proteção, remover mensagens dos usuários envolvidos, aplicar medidas preventivas e enviar um alerta para a administração.
+
+🔒 Modo de proteção
+
+Quando houver uma ameaça significativa, o bot poderá ativar automaticamente um modo de proteção.
+
+Nesse modo, usuários suspeitos poderão sofrer limitações maiores de frequência, mensagens com determinados tipos de conteúdo poderão ser bloqueadas e usuários recém-chegados poderão receber uma proteção adicional.
+
+Quando a atividade voltar ao normal, o sistema deverá retornar gradualmente ao funcionamento normal.
+
+📋 Registro de ocorrências
+
+Todas as detecções relevantes deverão ser registradas em um canal de logs configurado pela administração.
+
+O registro deverá informar o usuário envolvido, canal, tipo de spam detectado, quantidade de mensagens, nível de risco, mensagens removidas, punição aplicada e horário da ocorrência.
+
+Isso permitirá que a administração acompanhe o funcionamento do sistema e possa verificar possíveis falsos positivos.
+
+👤 Histórico do usuário
+
+O bot deverá manter um histórico das infrações de cada usuário.
+
+Assim, se uma pessoa já tiver sido advertida várias vezes por spam, o sistema poderá considerar essa reincidência ao calcular o risco e determinar uma punição mais severa.
+
+Infrações antigas também poderão perder peso gradualmente para evitar que um usuário fique permanentemente marcado por uma ocorrência muito antiga.
+
+⚙️ Configurações
+
+Todas as principais características deverão ser configuráveis pela administração através dos comandos do próprio bot, sem necessidade de telas personalizadas.
+
+Será possível configurar os limites de mensagens, tempo de análise, nível de similaridade, quantidade de menções, limite de links, punições, duração de timeouts, canais protegidos, cargos com permissões especiais, canais de logs, domínios permitidos e comportamento do Anti-Raid.
+
+🔐 Proteção contra falsos positivos
+
+O bot não deverá punir automaticamente baseado em apenas um indicador.
+
+Por exemplo, alguém pode enviar várias mensagens rapidamente durante uma conversa normal. Isso não significa necessariamente que esteja praticando spam.
+
+O sistema deverá analisar o conjunto de comportamentos antes de aplicar uma punição.
+
+Dessa forma, o objetivo é que o Anti-Spam seja agressivo contra ataques reais, mas tolerante com conversas normais.
+
+Fluxo geral
+
+Mensagem enviada → análise de frequência → análise de conteúdo → análise de repetição → análise de menções/links → análise do histórico → cálculo do risco → decisão → remoção da mensagem, se necessário → aviso privado → punição, se necessário → registro nos logs.
