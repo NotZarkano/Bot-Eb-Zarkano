@@ -1,0 +1,9 @@
+{
+  "disabledChannels": [
+    "1545913570011775066"
+  ],
+  "monitoredChannels": [],
+  "bypassRoleIds": [],
+  "logChannelId": null,
+  "protectionModeByGuild": {}
+}
