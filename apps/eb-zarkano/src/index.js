@@ -3,6 +3,7 @@ import { commands } from "./commands/index.js";
 import { getConfig } from "./config.js";
 import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
 import { handleGuildMemberRemove } from "./events/guildMemberRemove.js";
+import { handleAnnounceModal } from "./handlers/announceModal.js";
 import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleTicketButton } from "./handlers/ticketButtons.js";
 import { handleVerificationButton } from "./handlers/verificationButtons.js";
@@ -62,6 +63,30 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (interaction.isModalSubmit()) {
+    try {
+      const handled = await handleAnnounceModal(interaction);
+
+      if (!handled) {
+        console.warn(`Modal não tratado: ${interaction.customId}`);
+      }
+    } catch (error) {
+      console.error("Erro ao processar formulário:", error);
+
+      const response = {
+        content: "Não foi possível processar esse formulário agora.",
+        ephemeral: true,
+      };
+
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(response);
+      } else {
+        await interaction.reply(response);
+      }
+    }
+    return;
+  }
+
   if (interaction.isButton()) {
     try {
       const welcomeButtonHandled = await handleWelcomeButton(interaction);

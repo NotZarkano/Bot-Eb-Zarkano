@@ -82,7 +82,7 @@ export async function execute(interaction) {
 
   const username = interaction.options.getString("usuario", true);
 
-  await interaction.deferReply();
+  await interaction.deferReply({ ephemeral: true });
 
   try {
     const robloxUser = await resolveRobloxUser(username);
