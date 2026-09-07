@@ -1,3 +1,4 @@
+import { sendVerificationPrompt } from "../services/verificationSystem.js";
 import { sendWelcomeMessage } from "../services/welcomeMessage.js";
 
 const recentWelcomeEvents = new Map();
@@ -22,10 +23,20 @@ export async function handleGuildMemberAdd(member) {
 
     if (!result.sent) {
       console.warn(result.reason);
-      recentWelcomeEvents.delete(eventKey);
     }
   } catch (error) {
-    recentWelcomeEvents.delete(eventKey);
     console.error("Não foi possível enviar a mensagem de boas-vindas:", error);
+  }
+
+  try {
+    const dmResult = await sendVerificationPrompt(member);
+
+    if (!dmResult.sent) {
+      console.warn(
+        `Não foi possível enviar DM de verificação para ${member.user.tag}: ${dmResult.reason}`,
+      );
+    }
+  } catch (error) {
+    console.error("Não foi possível enviar o aviso de verificação por DM:", error);
   }
 }
