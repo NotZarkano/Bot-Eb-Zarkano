@@ -12,5 +12,6 @@ export function getConfig() {
   return {
     token: process.env.DISCORD_TOKEN,
     clientId: process.env.DISCORD_CLIENT_ID,
+    robloxApiKey: process.env.ROBLOX_OPEN_CLOUD_API_KEY ?? null,
   };
 }
