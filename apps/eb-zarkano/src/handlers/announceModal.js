@@ -17,7 +17,7 @@ export async function handleAnnounceModal(interaction) {
 
   const embed = new EmbedBuilder()
     .setColor(EB_ZARKANO_GREEN)
-    .setDescription(`# ${titulo}\n\n---\n\n${mensagem}`)
+    .setDescription(`# ${titulo}\n\n${mensagem}`)
     .setFooter({ text: "EB Zarkano" })
     .setTimestamp();
 
