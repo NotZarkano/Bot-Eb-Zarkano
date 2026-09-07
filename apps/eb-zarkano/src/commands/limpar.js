@@ -1,8 +1,10 @@
 import {
   ChannelType,
+  EmbedBuilder,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
+import { logAction } from "../services/auditLog.js";
 
 export const data = new SlashCommandBuilder()
   .setName("limpar")
@@ -46,6 +48,28 @@ export async function execute(interaction) {
 
     await interaction.editReply({
       content: `🧹 ${deletedMessages.size} mensagem(ns) apagada(s). Mensagens com mais de 14 dias não podem ser removidas em massa pelo Discord.`,
+    });
+
+    await logAction(interaction.client, {
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0xf2c94c)
+          .setTitle("🧹 Mensagens apagadas")
+          .addFields(
+            { name: "Canal", value: `${interaction.channel}`, inline: true },
+            {
+              name: "Quantidade",
+              value: `${deletedMessages.size}`,
+              inline: true,
+            },
+            {
+              name: "Executado por",
+              value: `${interaction.user}`,
+              inline: true,
+            },
+          )
+          .setTimestamp(),
+      ],
     });
   } catch (error) {
     console.error("Não foi possível apagar mensagens:", error);

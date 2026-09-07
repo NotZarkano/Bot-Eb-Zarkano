@@ -1,5 +1,6 @@
 import {
   ActionRowBuilder,
+  AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
@@ -8,6 +9,7 @@ import {
 } from "discord.js";
 import { getConfiguredChannelId } from "../config/channels.js";
 import { getConfiguredRoleId } from "../config/roles.js";
+import { logAction } from "./auditLog.js";
 
 const TICKET_OWNER_PREFIX = "eb-zarkano-ticket-owner:";
 const TICKET_ASSIGNEE_SEPARATOR = "|assignee:";
@@ -175,6 +177,28 @@ function createTicketChannelName(user) {
   return `ticket-${username || "membro"}-${user.id.slice(-4)}`;
 }
 
+async function buildTicketTranscript(channel) {
+  const fetchedMessages = await channel.messages.fetch({ limit: 100 });
+  const sortedMessages = [...fetchedMessages.values()].sort(
+    (a, b) => a.createdTimestamp - b.createdTimestamp,
+  );
+
+  const lines = sortedMessages.map((message) => {
+    const time = new Date(message.createdTimestamp).toLocaleString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const author = message.author.tag;
+    const content = message.content || "[sem texto — embed ou anexo]";
+    return `[${time}] ${author}: ${content}`;
+  });
+
+  return {
+    text: lines.join("\n") || "Nenhuma mensagem registrada neste ticket.",
+    count: sortedMessages.length,
+  };
+}
+
 export async function createTicket(interaction) {
   const { guild, user } = interaction;
 
@@ -337,6 +361,19 @@ export async function assumeTicket(interaction) {
     .catch((error) => {
       console.error("Não foi possível registrar a assunção do ticket:", error);
     });
+
+  await logAction(interaction.client, {
+    embeds: [
+      new EmbedBuilder()
+        .setColor(0xf2c94c)
+        .setTitle("👮 Ticket assumido")
+        .addFields(
+          { name: "Ticket", value: `${channel}`, inline: true },
+          { name: "Assumido por", value: `${interaction.user}`, inline: true },
+        )
+        .setTimestamp(),
+    ],
+  });
 }
 
 export async function closeTicket(interaction) {
@@ -364,6 +401,69 @@ export async function closeTicket(interaction) {
   await interaction.reply({
     content: "Este ticket será fechado em alguns segundos.",
     ephemeral: true,
+  });
+
+  const { text: transcriptText, count: messageCount } =
+    await buildTicketTranscript(channel).catch((error) => {
+      console.error("Não foi possível gerar o transcript do ticket:", error);
+      return { text: "Não foi possível gerar o transcript.", count: 0 };
+    });
+
+  const openedAt = new Date(channel.createdTimestamp);
+  const closedAt = new Date();
+  const motivo = isOwner
+    ? "Fechado pelo próprio autor."
+    : `Fechado pela equipe (${interaction.user.tag}).`;
+
+  const summaryEmbed = new EmbedBuilder()
+    .setColor(EB_ZARKANO_GOLD)
+    .setTitle("🎫 Ticket fechado")
+    .addFields(
+      { name: "Nome do ticket", value: channel.name, inline: false },
+      {
+        name: "Autor",
+        value: ownerId ? `<@${ownerId}>` : "Desconhecido",
+        inline: true,
+      },
+      { name: "Fechado por", value: `${interaction.user}`, inline: true },
+      { name: "Abertura", value: openedAt.toLocaleString("pt-BR"), inline: true },
+      { name: "Encerramento", value: closedAt.toLocaleString("pt-BR"), inline: true },
+      { name: "Motivo", value: motivo, inline: false },
+      { name: "Mensagens", value: `${messageCount}`, inline: true },
+    )
+    .setFooter({ text: "EB Zarkano • Atendimento" })
+    .setTimestamp();
+
+  if (ownerId) {
+    try {
+      const ownerMember = await interaction.guild.members
+        .fetch(ownerId)
+        .catch(() => null);
+
+      if (ownerMember) {
+        await ownerMember.send({
+          embeds: [summaryEmbed],
+          files: [
+            new AttachmentBuilder(Buffer.from(transcriptText, "utf-8"), {
+              name: `transcript-${channel.name}.txt`,
+            }),
+          ],
+        });
+      }
+    } catch (error) {
+      console.warn(
+        `Não foi possível enviar o relatório do ticket por DM: ${error.message}`,
+      );
+    }
+  }
+
+  await logAction(interaction.client, {
+    embeds: [summaryEmbed],
+    files: [
+      new AttachmentBuilder(Buffer.from(transcriptText, "utf-8"), {
+        name: `transcript-${channel.name}.txt`,
+      }),
+    ],
   });
 
   setTimeout(() => {

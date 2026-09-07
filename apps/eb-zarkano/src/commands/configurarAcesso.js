@@ -1,8 +1,10 @@
 import {
+  EmbedBuilder,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
 import { getConfiguredChannelId } from "../config/channels.js";
+import { logAction } from "../services/auditLog.js";
 
 export const data = new SlashCommandBuilder()
   .setName("configurar-acesso")
@@ -63,5 +65,19 @@ export async function execute(interaction) {
         ? `, ${failed} falharam (verifique se meu cargo tem permissão de gerenciar esses canais).`
         : "."
     }`,
+  });
+
+  await logAction(interaction.client, {
+    embeds: [
+      new EmbedBuilder()
+        .setColor(0xf2c94c)
+        .setTitle("⚙️ /configurar-acesso executado")
+        .addFields(
+          { name: "Canais ajustados", value: `${updated}`, inline: true },
+          { name: "Falhas", value: `${failed}`, inline: true },
+          { name: "Executado por", value: `${interaction.user}`, inline: true },
+        )
+        .setTimestamp(),
+    ],
   });
 }

@@ -1,9 +1,11 @@
 import {
   ChannelType,
+  EmbedBuilder,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
 import { getConfiguredRoleId } from "../config/roles.js";
+import { logAction } from "../services/auditLog.js";
 
 export const data = new SlashCommandBuilder()
   .setName("membrofalar")
@@ -90,9 +92,24 @@ export async function execute(interaction) {
     { reason },
   );
 
+  const newMode = isOpen ? "Fechado" : "Liberado (ver e falar)";
   const statusMessage = isOpen
     ? "🔒 Modo atual: **fechado**. Membros não podem ver nem conversar neste canal."
     : "🔓 Modo atual: **liberado**. Membros e membros certificados podem ver, conversar e ler o histórico deste canal.";
 
   await interaction.editReply({ content: statusMessage });
+
+  await logAction(interaction.client, {
+    embeds: [
+      new EmbedBuilder()
+        .setColor(0xf2c94c)
+        .setTitle("🔁 /membrofalar utilizado")
+        .addFields(
+          { name: "Canal", value: `${channel}`, inline: true },
+          { name: "Novo modo", value: newMode, inline: true },
+          { name: "Executado por", value: `${interaction.user}`, inline: true },
+        )
+        .setTimestamp(),
+    ],
+  });
 }

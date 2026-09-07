@@ -1,9 +1,11 @@
 import {
   ChannelType,
+  EmbedBuilder,
   PermissionFlagsBits,
   PermissionsBitField,
   SlashCommandBuilder,
 } from "discord.js";
+import { logAction } from "../services/auditLog.js";
 
 const LOCKED_BITS = new PermissionsBitField([
   PermissionsBitField.Flags.SendMessages,
@@ -91,5 +93,18 @@ export async function execute(interaction) {
 
   await interaction.editReply({
     content: "🔒 Este canal foi trancado. Apenas administradores podem conversar aqui.",
+  });
+
+  await logAction(interaction.client, {
+    embeds: [
+      new EmbedBuilder()
+        .setColor(0xf2c94c)
+        .setTitle("🔒 Canal trancado")
+        .addFields(
+          { name: "Canal", value: `${channel}`, inline: true },
+          { name: "Executado por", value: `${interaction.user}`, inline: true },
+        )
+        .setTimestamp(),
+    ],
   });
 }
