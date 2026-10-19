@@ -5,7 +5,6 @@ import { handleGuildMemberAdd } from "./events/guildMemberAdd.js";
 import { handleGuildMemberRemove } from "./events/guildMemberRemove.js";
 import { handleAnnounceModal } from "./handlers/announceModal.js";
 import { handleInformationButton } from "./handlers/informationButtons.js";
-import { handleTicketButton } from "./handlers/ticketButtons.js";
 import { handleVerificationButton } from "./handlers/verificationButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 import { startKeepAliveServer } from "./keepAlive.js";
@@ -14,7 +13,7 @@ import {
   startMembershipProgressionScheduler,
 } from "./services/membershipProgression.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
-import { ensureTicketPanel } from "./services/ticketSystem.js";
+import { removeLegacyTicketPanel } from "./services/legacyCleanup.js";
 import { startStaffActivityTracker, trackStaffMessage } from "./services/staffActivity.js";
 import { ensureVerificationPanel } from "./services/verificationSystem.js";
 
@@ -32,9 +31,9 @@ client.once(Events.ClientReady, async (readyClient) => {
   console.info(`EB Zarkano conectado como ${readyClient.user.tag}.`);
 
   try {
-    await ensureTicketPanel(readyClient);
+    await removeLegacyTicketPanel(readyClient);
   } catch (error) {
-    console.error("Não foi possível preparar o painel de tickets:", error);
+    console.error("Não foi possível apagar o painel antigo de tickets:", error);
   }
 
   try {
@@ -111,7 +110,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
-      await handleTicketButton(interaction);
+      // Botões que não existem mais (ex.: os do sistema de tickets antigo).
+      await interaction.reply({
+        content: "Esse botão foi desativado.",
+        ephemeral: true,
+      });
     } catch (error) {
       console.error("Erro ao processar botão interativo:", error);
 
