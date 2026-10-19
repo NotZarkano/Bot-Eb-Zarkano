@@ -9,6 +9,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "discord.js": "^14.22.1"
+    "discord.js": "^14.22.1",
+    "pg": "^8.22.0"
   }
 }
