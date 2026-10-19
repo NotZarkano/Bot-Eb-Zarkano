@@ -25,6 +25,11 @@ function getPool() {
   return pool;
 }
 
+// Consulta genérica no banco (usada por outros sistemas do bot).
+export async function query(text, params) {
+  return getPool().query(text, params);
+}
+
 // Busca o vínculo Discord <-> Roblox feito pelo site.
 // Retorna null se a pessoa ainda não vinculou.
 export async function findDiscordLink(discordId) {

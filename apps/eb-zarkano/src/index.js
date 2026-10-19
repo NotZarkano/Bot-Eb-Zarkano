@@ -15,6 +15,7 @@ import {
 } from "./services/membershipProgression.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
 import { ensureTicketPanel } from "./services/ticketSystem.js";
+import { startStaffActivityTracker, trackStaffMessage } from "./services/staffActivity.js";
 import { ensureVerificationPanel } from "./services/verificationSystem.js";
 
 const { token } = getConfig();
@@ -49,7 +50,10 @@ client.once(Events.ClientReady, async (readyClient) => {
   }
 
   startMembershipProgressionScheduler(readyClient);
+  startStaffActivityTracker(readyClient);
 });
+
+client.on(Events.MessageCreate, trackStaffMessage);
 
 client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
 client.on(Events.GuildMemberRemove, handleGuildMemberRemove);

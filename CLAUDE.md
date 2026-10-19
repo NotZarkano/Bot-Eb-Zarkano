@@ -37,6 +37,15 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   (máx. 32; "Criador" vira CRIADOR). Cooldown de 20s por pessoa.
 - Regra fixa: nunca dar nem tirar cargo com permissão de Administrador.
 
+## Relatório de inatividade da staff
+- `services/staffActivity.js`: guarda a última mensagem de quem tem o cargo
+  `staff` (tabela `staff_activity`, criada pelo bot; grava no máx. a cada
+  5 min por pessoa). No boot lê as últimas 100 mensagens de cada canal.
+- Staff nunca visto começa a contar a partir de quando o bot o viu.
+- Todo dia às 12:00 de Brasília manda no canal `inatividadeStaff` quem está
+  há mais de 2 dias sem mensagens (sem marcar ninguém). A tabela `bot_state`
+  guarda o dia do último relatório pra não repetir se o bot reiniciar.
+
 ## Variáveis de ambiente (nunca no código)
 `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `ROBLOX_OPEN_CLOUD_API_KEY`,
 `DATABASE_URL`, `PORT` (o Render define; servidor de keep-alive).
