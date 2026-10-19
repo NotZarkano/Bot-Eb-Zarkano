@@ -5,39 +5,63 @@ import {
   EmbedBuilder,
 } from "discord.js";
 import { getConfiguredChannelId } from "../config/channels.js";
-import { getConfiguredRoleId } from "../config/roles.js";
 
 const EB_ZARKANO_GREEN = 0x8fc63f;
-const VERIFICATION_PANEL_FOOTER = "EB Zarkano • Verificação";
+// Rodapé do painel antigo (botão "Verificar"). O bot apaga esse painel.
+const LEGACY_VERIFICATION_PANEL_FOOTER = "EB Zarkano • Verificação";
+const VERIFICATION_PANEL_FOOTER = "EB Zarkano • Vínculo Roblox";
+const SITE_URL = "https://ebzarkano.onrender.com";
 
 export const verificationButtonIds = Object.freeze({
-  verify: "verification:verify",
+  sync: "verification:sync",
+  link: "verification:link",
+  help: "verification:help",
 });
 
 function createVerificationPanelPayload() {
   const embed = new EmbedBuilder()
     .setColor(EB_ZARKANO_GREEN)
-    .setTitle("✅ Verificação — EB Zarkano")
+    .setTitle("🔗 Verificação — EB Zarkano")
     .setDescription(
       [
-        "Para ter acesso ao restante do servidor, clique no botão abaixo e confirme sua verificação.",
+        "Vincule sua conta do Roblox para receber sua patente, o cargo de membro e o apelido certo aqui no Discord.",
+        "",
+        "**Primeira vez?** Clique em **Vincular conta** e siga o passo a passo.",
+        "**Já vinculou?** Clique em **Sincronizar agora** sempre que sua patente mudar.",
         "",
         "Ao verificar, você concorda em seguir as regras do Exército Brasileiro — EB Zarkano.",
       ].join("\n"),
     )
-    .setFooter({ text: VERIFICATION_PANEL_FOOTER })
-    .setTimestamp();
+    .setFooter({ text: VERIFICATION_PANEL_FOOTER });
 
-  const verifyButton = new ButtonBuilder()
-    .setCustomId(verificationButtonIds.verify)
-    .setLabel("Verificar")
-    .setEmoji("✅")
+  const syncButton = new ButtonBuilder()
+    .setCustomId(verificationButtonIds.sync)
+    .setLabel("Sincronizar agora")
+    .setEmoji("🔄")
     .setStyle(ButtonStyle.Success);
+
+  const linkButton = new ButtonBuilder()
+    .setCustomId(verificationButtonIds.link)
+    .setLabel("Vincular conta")
+    .setEmoji("🔗")
+    .setStyle(ButtonStyle.Primary);
+
+  const helpButton = new ButtonBuilder()
+    .setCustomId(verificationButtonIds.help)
+    .setLabel("Problema?")
+    .setEmoji("❓")
+    .setStyle(ButtonStyle.Secondary);
 
   return {
     embeds: [embed],
-    components: [new ActionRowBuilder().addComponents(verifyButton)],
+    components: [
+      new ActionRowBuilder().addComponents(syncButton, linkButton, helpButton),
+    ],
   };
+}
+
+function hasFooter(message, footerText) {
+  return message.embeds.some((embed) => embed.footer?.text === footerText);
 }
 
 export async function ensureVerificationPanel(client) {
@@ -59,17 +83,31 @@ export async function ensureVerificationPanel(client) {
   }
 
   const messages = await verificationChannel.messages.fetch({ limit: 50 });
-  const existingPanel = messages.find(
-    (message) =>
-      message.author.id === client.user.id &&
-      message.embeds.some(
-        (embed) => embed.footer?.text === VERIFICATION_PANEL_FOOTER,
-      ),
+  const botMessages = messages.filter(
+    (message) => message.author.id === client.user.id,
+  );
+
+  for (const legacyPanel of botMessages
+    .filter((message) => hasFooter(message, LEGACY_VERIFICATION_PANEL_FOOTER))
+    .values()) {
+    try {
+      await legacyPanel.delete();
+      console.info(
+        `Painel antigo de verificação apagado em #${verificationChannel.name}.`,
+      );
+    } catch (error) {
+      console.error("Não foi possível apagar o painel antigo de verificação:", error);
+    }
+  }
+
+  const existingPanel = botMessages.find((message) =>
+    hasFooter(message, VERIFICATION_PANEL_FOOTER),
   );
 
   if (existingPanel) {
+    await existingPanel.edit(createVerificationPanelPayload());
     console.info(
-      `Painel de verificação encontrado em #${verificationChannel.name}.`,
+      `Painel de verificação atualizado em #${verificationChannel.name}.`,
     );
     return { created: false, message: existingPanel };
   }
@@ -81,49 +119,42 @@ export async function ensureVerificationPanel(client) {
   return { created: true, message: panelMessage };
 }
 
-export async function verifyMember(interaction) {
-  const membroRoleId = getConfiguredRoleId("membro");
-
-  if (!membroRoleId) {
-    await interaction.reply({
-      content: "O cargo de membro ainda não foi configurado. Avise a equipe.",
-      ephemeral: true,
-    });
-    return;
-  }
-
-  const membroCertificadoRoleId = getConfiguredRoleId("membroCertificado");
-  const member = interaction.member;
-
-  if (
-    member.roles.cache.has(membroRoleId) ||
-    (membroCertificadoRoleId &&
-      member.roles.cache.has(membroCertificadoRoleId))
-  ) {
-    await interaction.reply({
-      content: "Você já está verificado!",
-      ephemeral: true,
-    });
-    return;
-  }
-
-  try {
-    await member.roles.add(membroRoleId, "Verificação concluída");
-    await interaction.reply({
-      content: "✅ Verificação concluída! Bem-vindo(a) ao EB Zarkano.",
-      ephemeral: true,
-    });
-  } catch (error) {
-    console.error(
-      "Não foi possível atribuir o cargo de membro na verificação:",
-      error,
+export async function sendLinkInstructions(interaction) {
+  const embed = new EmbedBuilder()
+    .setColor(EB_ZARKANO_GREEN)
+    .setTitle("🔗 Como vincular sua conta")
+    .setDescription(
+      [
+        `**1.** Entre em ${SITE_URL} e faça login com o **Roblox**.`,
+        "**2.** Abra a aba **Perfil** e clique em **Vincular Discord**.",
+        "**3.** Autorize no Discord (é só confirmar quem você é).",
+        "**4.** Volte aqui e clique em **Sincronizar agora**.",
+      ].join("\n"),
     );
-    await interaction.reply({
-      content:
-        "Não foi possível concluir sua verificação agora. Tente novamente em instantes.",
-      ephemeral: true,
-    });
-  }
+
+  await interaction.reply({ embeds: [embed], ephemeral: true });
+}
+
+export async function sendHelp(interaction) {
+  const ticketsChannelId = getConfiguredChannelId("tickets");
+  const embed = new EmbedBuilder()
+    .setColor(EB_ZARKANO_GREEN)
+    .setTitle("❓ Problemas comuns")
+    .setDescription(
+      [
+        "**\"Seu Discord ainda não está vinculado\"** — faça o passo a passo do botão **Vincular conta**.",
+        "**\"Não está no grupo\"** — entre no grupo do EB Zarkano no Roblox e sincronize de novo.",
+        "**Patente errada** — sua patente mudou há pouco? Espere alguns minutos e sincronize de novo.",
+        "**Apelido não mudou** — o bot não consegue mudar o apelido do dono do servidor nem de quem tem cargo acima do bot.",
+        "**Vinculou a conta errada** — no site, no seu perfil, clique em **Desvincular** e vincule de novo.",
+        "",
+        ticketsChannelId
+          ? `Ainda com problema? Abra um ticket em <#${ticketsChannelId}>.`
+          : "Ainda com problema? Fale com a equipe.",
+      ].join("\n"),
+    );
+
+  await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
 export async function sendVerificationPrompt(member) {
@@ -138,7 +169,7 @@ export async function sendVerificationPrompt(member) {
     .setTitle("✅ Falta pouco para você ter acesso completo!")
     .setDescription(
       [
-        `Olá, ${member}! Para liberar o restante do servidor **EB Zarkano**, acesse o canal <#${verificationChannelId}> e clique no botão de verificação.`,
+        `Olá, ${member}! Para liberar o restante do servidor **EB Zarkano**, acesse o canal <#${verificationChannelId}>, vincule sua conta do Roblox e clique em **Sincronizar agora**.`,
       ].join("\n"),
     )
     .setFooter({ text: VERIFICATION_PANEL_FOOTER })

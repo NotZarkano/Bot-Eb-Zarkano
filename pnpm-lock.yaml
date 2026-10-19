@@ -170,6 +170,9 @@ importers:
       discord.js:
         specifier: ^14.22.1
         version: 14.27.0
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
 
   artifacts/api-server:
     dependencies:
