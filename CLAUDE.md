@@ -19,7 +19,7 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
 - `config.js` — variáveis de ambiente. `config/channels.js`, `config/roles.js`,
   `config/roblox.js` — IDs fixos de canais, cargos e grupo.
 - `commands/` — comandos de barra (`/patente`, `/anunciar`, ...).
-- `handlers/` — botões e modais. `services/` — lógica (painéis, tickets, logs...).
+- `handlers/` — botões e modais. `services/` — lógica (painéis, logs...).
 - `utils/rankNames.js` — normaliza nomes de patente, sigla e apelido.
 
 ## Verificação / vínculo Discord <-> Roblox
@@ -29,7 +29,8 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   "EB Zarkano • Vínculo Roblox". No boot o bot apaga o painel antigo
   (rodapé "EB Zarkano • Verificação") e edita o novo se já existir.
 - Botões: "Sincronizar agora" (`services/rankSync.js`), "Vincular conta"
-  (passo a passo) e "Problema?" (ajuda). Respostas sempre efêmeras.
+  (passo a passo; se já vinculado, avisa qual conta) e "Problema?" (ajuda).
+  Respostas sempre efêmeras.
 - Sincronizar: lê `discord_links` (`services/database.js`), busca a patente
   pela Open Cloud v2 (`services/robloxGroup.js`), tira cargos de outras
   patentes, dá o cargo com o mesmo nome (sem sigla/acento), dá Membro se não
@@ -45,6 +46,11 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
 - Todo dia às 12:00 de Brasília manda no canal `inatividadeStaff` quem está
   há mais de 2 dias sem mensagens (sem marcar ninguém). A tabela `bot_state`
   guarda o dia do último relatório pra não repetir se o bot reiniciar.
+
+## Tickets (removido)
+- O bot não tem mais sistema de tickets. No boot, `services/legacyCleanup.js`
+  apaga o painel antigo "Abrir ticket" que o bot deixou no canal `tickets`.
+  Botões antigos sem dono respondem "Esse botão foi desativado".
 
 ## Variáveis de ambiente (nunca no código)
 `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `ROBLOX_OPEN_CLOUD_API_KEY`,

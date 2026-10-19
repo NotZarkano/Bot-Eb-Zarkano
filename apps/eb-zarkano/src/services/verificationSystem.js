@@ -5,6 +5,7 @@ import {
   EmbedBuilder,
 } from "discord.js";
 import { getConfiguredChannelId } from "../config/channels.js";
+import { findDiscordLink } from "./database.js";
 
 const EB_ZARKANO_GREEN = 0x8fc63f;
 // Rodapé do painel antigo (botão "Verificar"). O bot apaga esse painel.
@@ -120,6 +121,27 @@ export async function ensureVerificationPanel(client) {
 }
 
 export async function sendLinkInstructions(interaction) {
+  let link = null;
+
+  try {
+    link = await findDiscordLink(interaction.user.id);
+  } catch (error) {
+    // Sem banco ou sem tabela: só mostra o passo a passo.
+    link = null;
+  }
+
+  if (link) {
+    await interaction.reply({
+      content: [
+        `✅ Seu Discord já está vinculado à conta do Roblox **${link.robloxUsername || link.robloxId}**.`,
+        "Clique em **Sincronizar agora** para atualizar sua patente e seu apelido.",
+        `Quer trocar de conta? Entre em ${SITE_URL}, abra o **Perfil**, clique em **Desvincular** e vincule de novo.`,
+      ].join("\n"),
+      ephemeral: true,
+    });
+    return;
+  }
+
   const embed = new EmbedBuilder()
     .setColor(EB_ZARKANO_GREEN)
     .setTitle("🔗 Como vincular sua conta")
@@ -136,7 +158,6 @@ export async function sendLinkInstructions(interaction) {
 }
 
 export async function sendHelp(interaction) {
-  const ticketsChannelId = getConfiguredChannelId("tickets");
   const embed = new EmbedBuilder()
     .setColor(EB_ZARKANO_GREEN)
     .setTitle("❓ Problemas comuns")
@@ -148,9 +169,7 @@ export async function sendHelp(interaction) {
         "**Apelido não mudou** — o bot não consegue mudar o apelido do dono do servidor nem de quem tem cargo acima do bot.",
         "**Vinculou a conta errada** — no site, no seu perfil, clique em **Desvincular** e vincule de novo.",
         "",
-        ticketsChannelId
-          ? `Ainda com problema? Abra um ticket em <#${ticketsChannelId}>.`
-          : "Ainda com problema? Fale com a equipe.",
+        "Ainda com problema? Fale com a equipe.",
       ].join("\n"),
     );
 
