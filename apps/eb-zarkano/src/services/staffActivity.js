@@ -1,6 +1,6 @@
 import { ChannelType, EmbedBuilder } from "discord.js";
 import { getConfiguredChannelId } from "../config/channels.js";
-import { getConfiguredRoleId } from "../config/roles.js";
+import { normalizeRankName } from "../utils/rankNames.js";
 import { query } from "./database.js";
 
 const EB_ZARKANO_GREEN = 0x8fc63f;
@@ -12,12 +12,22 @@ const CHECK_INTERVAL_MS = 10 * 60 * 1000; // confere a cada 10 min se é hora do
 const REPORT_HOUR_UTC = 15;
 const BRASILIA_OFFSET_MS = -3 * 60 * 60 * 1000;
 
+// >>> Cargo que todo staff tem. O bot procura pelo nome (sem emoji/acento),
+// então trocar o emoji ou a cor do cargo não quebra nada.
+const STAFF_ROLE_NAME = "equipe administrativa";
+
 const lastSavedAt = new Map();
 let enabled = false;
 
+function findStaffRole(guild) {
+  return guild.roles.cache.find(
+    (role) => normalizeRankName(role.name) === STAFF_ROLE_NAME,
+  );
+}
+
 function isStaff(member) {
-  const staffRoleId = getConfiguredRoleId("staff");
-  return Boolean(staffRoleId && member?.roles?.cache?.has(staffRoleId));
+  const staffRole = member?.guild && findStaffRole(member.guild);
+  return Boolean(staffRole && member.roles.cache.has(staffRole.id));
 }
 
 async function saveLastMessage(userId, timestamp) {
@@ -88,17 +98,23 @@ function formatInactiveLine(member, lastMessageAt) {
 
 export async function sendStaffInactivityReport(client) {
   const channelId = getConfiguredChannelId("inatividadeStaff");
-  const staffRoleId = getConfiguredRoleId("staff");
 
-  if (!channelId || !staffRoleId) {
-    console.warn("Canal ou cargo de staff do relatório de inatividade não configurado.");
+  if (!channelId) {
+    console.warn("Canal do relatório de inatividade não configurado.");
     return;
   }
 
   const channel = await client.channels.fetch(channelId);
   const guild = channel.guild;
+  const staffRole = findStaffRole(guild);
+
+  if (!staffRole) {
+    console.warn('Cargo "Equipe Administrativa" não encontrado; relatório não enviado.');
+    return;
+  }
+
   const members = await guild.members.fetch();
-  const staff = members.filter((member) => !member.user.bot && member.roles.cache.has(staffRoleId));
+  const staff = members.filter((member) => !member.user.bot && member.roles.cache.has(staffRole.id));
 
   // Staff que nunca foi visto começa a contar a partir de agora,
   // pra ninguém ser acusado de inativo sem o bot ter observado.

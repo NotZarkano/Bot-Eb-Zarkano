@@ -39,7 +39,7 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
 
 ## Relatório de inatividade da staff
 - `services/staffActivity.js`: guarda a última mensagem de quem tem o cargo
-  `staff` (tabela `staff_activity`, criada pelo bot; grava no máx. a cada
+  "🔨 | Equipe Administrativa" (achado pelo nome, não pelo ID) (tabela `staff_activity`, criada pelo bot; grava no máx. a cada
   5 min por pessoa). No boot lê as últimas 100 mensagens de cada canal.
 - Staff nunca visto começa a contar a partir de quando o bot o viu.
 - Todo dia às 12:00 de Brasília manda no canal `inatividadeStaff` quem está
