@@ -2,6 +2,7 @@ export const channelIds = Object.freeze({
   boasVindas: "1543335998509809694",
   informacoes: "1546222671329759403",
   logs: "1546212495537213460",
+  pingsExames: "1563232278329430096",
   inatividadeStaff: "1561556958711119872",
   recrutamento: "1543620131911893042",
   tickets: "1546216237497843843",
