@@ -54,6 +54,10 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   lista de cargos do servidor (máx. 25). Clicar dá o cargo; clicar de novo tira.
 - Criar/renomear/apagar um cargo "Notificação ..." atualiza o painel sozinho
   (eventos GuildRole*). Cargo com Administrador ou gerenciado nunca entra.
+- Emoji do botão: emoji do servidor com o mesmo nome do botão (sem acento,
+  espaço ou símbolo; exato primeiro, depois "começa com"). Nomes diferentes
+  ficam em `EMOJI_ALIASES` (ex.: BAC -> :comandos:). Mudar emojis também
+  atualiza o painel (intent GuildExpressions).
 
 ## Tickets (removido)
 - O bot não tem mais sistema de tickets. No boot, `services/legacyCleanup.js`
