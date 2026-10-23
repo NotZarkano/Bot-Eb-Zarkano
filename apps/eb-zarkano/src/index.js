@@ -13,6 +13,7 @@ import {
   startMembershipProgressionScheduler,
 } from "./services/membershipProgression.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
+import { ensurePingPanel, handlePingButton, schedulePingPanelRefresh } from "./services/pingPanel.js";
 import { removeLegacyTicketPanel } from "./services/legacyCleanup.js";
 import { startStaffActivityTracker, trackStaffMessage } from "./services/staffActivity.js";
 import { ensureVerificationPanel } from "./services/verificationSystem.js";
@@ -48,11 +49,21 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.error("Não foi possível preparar o painel de verificação:", error);
   }
 
+  try {
+    await ensurePingPanel(readyClient);
+  } catch (error) {
+    console.error("Não foi possível preparar o painel de pings:", error);
+  }
+
   startMembershipProgressionScheduler(readyClient);
   startStaffActivityTracker(readyClient);
 });
 
 client.on(Events.MessageCreate, trackStaffMessage);
+
+client.on(Events.GuildRoleCreate, (role) => schedulePingPanelRefresh(client, role));
+client.on(Events.GuildRoleUpdate, (oldRole, newRole) => schedulePingPanelRefresh(client, oldRole, newRole));
+client.on(Events.GuildRoleDelete, (role) => schedulePingPanelRefresh(client, role));
 
 client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
 client.on(Events.GuildMemberRemove, handleGuildMemberRemove);
@@ -101,6 +112,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const informationButtonHandled = await handleInformationButton(interaction);
 
       if (informationButtonHandled) {
+        return;
+      }
+
+      const pingButtonHandled = await handlePingButton(interaction);
+
+      if (pingButtonHandled) {
         return;
       }
 

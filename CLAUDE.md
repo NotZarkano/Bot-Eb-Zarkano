@@ -47,6 +47,14 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   há mais de 2 dias sem mensagens (sem marcar ninguém). A tabela `bot_state`
   guarda o dia do último relatório pra não repetir se o bot reiniciar.
 
+## Painel de pings (exames)
+- `services/pingPanel.js`: painel no canal `pingsExames` (rodapé
+  "EB Zarkano • Pings de exames"). Todo cargo cujo nome começa com
+  "Notificação" vira um botão ("Notificação BFE" -> "BFE"), na ordem da
+  lista de cargos do servidor (máx. 25). Clicar dá o cargo; clicar de novo tira.
+- Criar/renomear/apagar um cargo "Notificação ..." atualiza o painel sozinho
+  (eventos GuildRole*). Cargo com Administrador ou gerenciado nunca entra.
+
 ## Tickets (removido)
 - O bot não tem mais sistema de tickets. No boot, `services/legacyCleanup.js`
   apaga o painel antigo "Abrir ticket" que o bot deixou no canal `tickets`.
