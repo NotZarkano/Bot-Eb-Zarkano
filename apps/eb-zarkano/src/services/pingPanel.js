@@ -18,6 +18,32 @@ const MAX_BUTTONS = 25; // limite do Discord: 5 linhas de 5 botões
 // desses atualiza o painel sozinho.
 const PING_ROLE_PREFIX = "notificacao ";
 
+// >>> Emoji de cada botão: o bot procura no servidor um emoji com o mesmo
+// nome do botão ("BFE" -> :bfe:, "BI CAAT" -> :Bi_CAATr:). Quando o nome
+// do emoji é diferente, coloque aqui: nome do botão -> nome do emoji.
+const EMOJI_ALIASES = {
+  bac: "comandos",
+};
+
+function emojiKey(text) {
+  return normalizeRankName(text).replace(/ /g, "");
+}
+
+function findButtonEmoji(guild, label) {
+  const labelKey = emojiKey(label);
+  const wanted = EMOJI_ALIASES[labelKey] ? emojiKey(EMOJI_ALIASES[labelKey]) : labelKey;
+  const emojis = [...guild.emojis.cache.values()].filter((emoji) => emoji.available !== false);
+
+  // Primeiro nome exato; senão, um emoji que comece com o nome do botão.
+  return (
+    emojis.find((emoji) => emojiKey(emoji.name) === wanted) ??
+    emojis
+      .filter((emoji) => emojiKey(emoji.name).startsWith(wanted))
+      .sort((a, b) => a.name.length - b.name.length)[0] ??
+    null
+  );
+}
+
 function isPingRole(role) {
   return (
     !role.managed &&
@@ -38,26 +64,33 @@ function getPingRoles(guild) {
     .slice(0, MAX_BUTTONS);
 }
 
-function createPingPanelPayload(pingRoles) {
+function createPingPanelPayload(guild, pingRoles) {
   const embed = new EmbedBuilder()
     .setColor(EB_ZARKANO_GREEN)
-    .setTitle("🔔 Pings de Exames")
+    .setTitle("📣 Central de Pings — Exames de Divisões")
     .setDescription(
       [
-        "Clique nos botões abaixo para ser notificado quando houver um exame para ingresso em uma divisão do nosso Exército.",
-        "Clique de novo no mesmo botão para deixar de receber.",
+        "Quer entrar para uma divisão do EB Zarkano? Escolha abaixo as divisões que te interessam e você será **marcado** sempre que abrir um exame de ingresso nelas.",
         "",
-        "⭐ Boa sorte nos TAFs, vocês vão precisar!",
+        "🟢 Clique em uma divisão para **ativar** o aviso.",
+        "🔴 Clique de novo para **desativar**.",
+        "📌 Pode escolher quantas quiser.",
+        "",
+        "Prepare-se bem: o exame é a sua porta de entrada. 🎖️",
       ].join("\n"),
     )
     .setFooter({ text: PING_PANEL_FOOTER });
 
   const buttons = pingRoles.map((role) => {
+    const label = getButtonLabel(role);
     const button = new ButtonBuilder()
       .setCustomId(`${PING_BUTTON_PREFIX}${role.id}`)
-      .setLabel(getButtonLabel(role))
+      .setLabel(label)
       .setStyle(ButtonStyle.Secondary);
-    if (role.unicodeEmoji) {
+    const emoji = findButtonEmoji(guild, label);
+    if (emoji) {
+      button.setEmoji({ id: emoji.id, name: emoji.name, animated: emoji.animated });
+    } else if (role.unicodeEmoji) {
       button.setEmoji(role.unicodeEmoji);
     }
     return button;
@@ -89,7 +122,8 @@ export async function ensurePingPanel(client) {
   }
 
   await channel.guild.roles.fetch();
-  const payload = createPingPanelPayload(getPingRoles(channel.guild));
+  await channel.guild.emojis.fetch();
+  const payload = createPingPanelPayload(channel.guild, getPingRoles(channel.guild));
 
   const messages = await channel.messages.fetch({ limit: 50 });
   const existingPanel = messages.find(
@@ -118,6 +152,11 @@ export function schedulePingPanelRefresh(client, ...roles) {
     return;
   }
 
+  schedulePingPanelRefreshNow(client);
+}
+
+// Emoji criado/renomeado/apagado: atualiza o painel também.
+export function schedulePingPanelRefreshNow(client) {
   clearTimeout(refreshTimer);
   refreshTimer = setTimeout(() => {
     ensurePingPanel(client).catch((error) => {

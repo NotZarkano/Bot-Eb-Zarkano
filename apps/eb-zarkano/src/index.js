@@ -13,7 +13,12 @@ import {
   startMembershipProgressionScheduler,
 } from "./services/membershipProgression.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
-import { ensurePingPanel, handlePingButton, schedulePingPanelRefresh } from "./services/pingPanel.js";
+import {
+  ensurePingPanel,
+  handlePingButton,
+  schedulePingPanelRefresh,
+  schedulePingPanelRefreshNow,
+} from "./services/pingPanel.js";
 import { removeLegacyTicketPanel } from "./services/legacyCleanup.js";
 import { startStaffActivityTracker, trackStaffMessage } from "./services/staffActivity.js";
 import { ensureVerificationPanel } from "./services/verificationSystem.js";
@@ -23,6 +28,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildExpressions,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
   ],
@@ -64,6 +70,9 @@ client.on(Events.MessageCreate, trackStaffMessage);
 client.on(Events.GuildRoleCreate, (role) => schedulePingPanelRefresh(client, role));
 client.on(Events.GuildRoleUpdate, (oldRole, newRole) => schedulePingPanelRefresh(client, oldRole, newRole));
 client.on(Events.GuildRoleDelete, (role) => schedulePingPanelRefresh(client, role));
+client.on(Events.GuildEmojiCreate, () => schedulePingPanelRefreshNow(client));
+client.on(Events.GuildEmojiUpdate, () => schedulePingPanelRefreshNow(client));
+client.on(Events.GuildEmojiDelete, () => schedulePingPanelRefreshNow(client));
 
 client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
 client.on(Events.GuildMemberRemove, handleGuildMemberRemove);
