@@ -43,7 +43,7 @@ Bot do Discord baseado em Node.js e discord.js, com comandos slash carregados de
 - Os comandos são registrados globalmente pela API do Discord, então não é necessário manter um servidor específico configurado.
 - O bot usa as intents `Guilds` e `GuildMembers`, sem habilitar acesso ao conteúdo das mensagens.
 - A intent `GuildMembers` é usada somente para detectar novas entradas e enviar boas-vindas.
-- O token e o Application ID são lidos exclusivamente dos Secrets do Replit.
+- O token e o Application ID são lidos exclusivamente das variáveis do host (Square Cloud).
 
 ## Product
 

@@ -1,8 +1,9 @@
 # EB Zarkano — Bot do Discord
 
 Bot do servidor do Exército Brasileiro Zarkano (grupo Roblox `7797329`).
-Hospedado no Render, que publica sozinho a branch `main`: nunca dar push
-direto nela, sempre abrir PR.
+Hospedado na **Square Cloud** (plano Hobby), com deploy por zip (ver
+"Deploy na Square Cloud"). Nunca dar push direto na `main`, sempre abrir PR.
+(Antes ficava no Render, que publicava a `main` sozinho; o site continua lá.)
 
 O dono do projeto não é programador: explicar mudanças em português simples.
 
@@ -76,9 +77,23 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   apaga o painel antigo "Abrir ticket" que o bot deixou no canal `tickets`.
   Botões antigos sem dono respondem "Esse botão foi desativado".
 
+## Deploy na Square Cloud
+- `apps/eb-zarkano/squarecloud.app`: config da Square Cloud (`MAIN=src/index.js`,
+  `MEMORY=512`, `AUTORESTART=true`). Fica na raiz do zip, ao lado do package.json.
+- `npm run pack:squarecloud` (dentro de `apps/eb-zarkano`) gera
+  `apps/eb-zarkano/dist/eb-zarkano-squarecloud.zip` com só `squarecloud.app`,
+  `package.json`, `src/` e `assets/` (sem node_modules, lockfiles nem .env).
+  A Square Cloud roda `npm install` sozinha. Feito só com Node (sem programa de zip).
+- `src/keepAlive.js` só liga se `KEEP_ALIVE=true` ou se o host definir `PORT`
+  (o Render define). Na Square Cloud não liga, e não precisa.
+- Uso de memória medido no boot (antes do login): ~100 MB de RSS.
+- Nunca ligar o bot em dois hosts ao mesmo tempo com o mesmo token: as
+  respostas saem duplicadas.
+
 ## Variáveis de ambiente (nunca no código)
-`DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `ROBLOX_OPEN_CLOUD_API_KEY`,
-`DATABASE_URL`, `PORT` (o Render define; servidor de keep-alive).
+Ficam nas variáveis do host (Square Cloud): `DISCORD_TOKEN`,
+`DISCORD_CLIENT_ID`, `ROBLOX_OPEN_CLOUD_API_KEY`, `DATABASE_URL` (Neon, a
+mesma do site). Opcionais: `PORT` / `KEEP_ALIVE` (só para o keep-alive).
 
 ## Convenções
 - Código em inglês, textos pro usuário e comentários em português.
