@@ -8,6 +8,7 @@ import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleVerificationButton } from "./handlers/verificationButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 import { startKeepAliveServer } from "./keepAlive.js";
+import { registerSlashCommands } from "./services/commandRegistration.js";
 import {
   enforceRoleExclusivity,
   startMembershipProgressionScheduler,
@@ -23,7 +24,7 @@ import { removeLegacyTicketPanel } from "./services/legacyCleanup.js";
 import { startStaffActivityTracker, trackStaffMessage } from "./services/staffActivity.js";
 import { ensureVerificationPanel } from "./services/verificationSystem.js";
 
-const { token } = getConfig();
+const { token, clientId } = getConfig();
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -36,6 +37,13 @@ const client = new Client({
 
 client.once(Events.ClientReady, async (readyClient) => {
   console.info(`EB Zarkano conectado como ${readyClient.user.tag}.`);
+
+  try {
+    const total = await registerSlashCommands(clientId, token);
+    console.info(`${total} comando(s) slash registrado(s).`);
+  } catch (error) {
+    console.error("Não foi possível registrar os comandos de barra:", error);
+  }
 
   try {
     await removeLegacyTicketPanel(readyClient);

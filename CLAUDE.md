@@ -59,6 +59,18 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   ficam em `EMOJI_ALIASES` (ex.: BAC -> :comandos:). Mudar emojis também
   atualiza o painel (intent GuildExpressions).
 
+## Comando /cdp
+- `commands/cdp.js` + `services/cdp.js`: mostra a CDP de quem usou (ou de
+  outro membro, opção `membro`): barra de progresso, quanto falta (horas e
+  minutos) e quando libera. Avisa se não vinculou ou se não está no grupo.
+- A regra e a tabela de horas são uma CÓPIA do `cdp.js` do site, usando as
+  mesmas tabelas (`cdp_patente`, `site_config`). Mudou os tempos no site?
+  Mude aqui também.
+
+## Comandos de barra
+- O bot registra os comandos sozinho ao ligar (`services/commandRegistration.js`).
+  `npm run register` continua funcionando para registrar à mão.
+
 ## Tickets (removido)
 - O bot não tem mais sistema de tickets. No boot, `services/legacyCleanup.js`
   apaga o painel antigo "Abrir ticket" que o bot deixou no canal `tickets`.
