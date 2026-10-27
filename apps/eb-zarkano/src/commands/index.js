@@ -1,4 +1,5 @@
 import * as anunciar from "./anunciar.js";
+import * as cdp from "./cdp.js";
 import * as configurarAcesso from "./configurarAcesso.js";
 import * as limpar from "./limpar.js";
 import * as lockChannel from "./lockChannel.js";
@@ -9,6 +10,7 @@ import * as testWelcome from "./testWelcome.js";
 
 export const commands = new Map([
   [anunciar.data.name, anunciar],
+  [cdp.data.name, cdp],
   [configurarAcesso.data.name, configurarAcesso],
   [limpar.data.name, limpar],
   [lockChannel.data.name, lockChannel],
