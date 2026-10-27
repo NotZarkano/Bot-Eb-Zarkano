@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "register": "node src/register-commands.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "pack:squarecloud": "node scripts/pack-squarecloud.mjs"
   },
   "dependencies": {
     "discord.js": "^14.22.1",

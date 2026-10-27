@@ -1,7 +1,7 @@
 import pg from "pg";
 
 // >>> Conexão com o mesmo banco (Neon) usado pelo site
-// Defina DATABASE_URL nas variáveis de ambiente do bot (Render).
+// Defina DATABASE_URL nas variáveis do host (Square Cloud).
 let pool = null;
 
 export class LinkSystemInactiveError extends Error {}

@@ -7,7 +7,7 @@ import { handleAnnounceModal } from "./handlers/announceModal.js";
 import { handleInformationButton } from "./handlers/informationButtons.js";
 import { handleVerificationButton } from "./handlers/verificationButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
-import { startKeepAliveServer } from "./keepAlive.js";
+import { shouldStartKeepAlive, startKeepAliveServer } from "./keepAlive.js";
 import { registerSlashCommands } from "./services/commandRegistration.js";
 import {
   enforceRoleExclusivity,
@@ -212,6 +212,8 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
-startKeepAliveServer();
+if (shouldStartKeepAlive()) {
+  startKeepAliveServer();
+}
 
 await client.login(token);
