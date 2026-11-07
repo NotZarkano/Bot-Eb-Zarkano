@@ -37,6 +37,11 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   patentes, dá o cargo com o mesmo nome (sem sigla/acento), dá Membro se não
   tiver Membro nem Membro Certificado, e põe o apelido `[SIGLA] usuario`
   (máx. 32; "Criador" vira CRIADOR). Cooldown de 20s por pessoa.
+- Cargo de grupo (`utils/rankCategories.js`): Praças, Praças Especiais,
+  Graduados, Oficiais Inferiores/Intermediários/Superiores/Generais (mesma
+  divisão da CDP), Marechal -> Patentes Honorárias, administração -> Equipe
+  Administrativa. Achados pelo nome no Discord. Sincronizar dá o certo e tira
+  os outros grupos; "Equipe Administrativa" o bot só dá, nunca tira.
 - Regra fixa: nunca dar nem tirar cargo com permissão de Administrador.
 
 ## Relatório de inatividade da staff

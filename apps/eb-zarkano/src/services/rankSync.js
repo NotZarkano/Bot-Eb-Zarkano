@@ -1,6 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { getConfig } from "../config.js";
 import { getConfiguredRoleId } from "../config/roles.js";
+import { CATEGORY_ROLE_NAMES, categoryForRank } from "../utils/rankCategories.js";
 import { buildNickname, normalizeRankName } from "../utils/rankNames.js";
 import { findDiscordLink, LinkSystemInactiveError } from "./database.js";
 import { fetchGroupRoles, fetchMemberGroupRole } from "./robloxGroup.js";
@@ -184,6 +185,39 @@ export async function syncMember(interaction) {
       warnings.push(`Não consegui dar o cargo **${membroRole.name}** (está acima do bot).`);
     } else {
       toAdd.push(membroRole);
+    }
+  }
+
+  // Cargo de grupo (Praças, Graduados, Oficiais..., Patentes Honorárias ou
+  // Equipe Administrativa): dá o certo e tira os outros grupos.
+  // "Equipe Administrativa" o bot só dá, nunca tira (pode ter sido dado à mão).
+  const categoryRoles = new Map();
+  for (const [key, roleName] of Object.entries(CATEGORY_ROLE_NAMES)) {
+    const role = guild.roles.cache.find((r) => normalizeRankName(r.name) === roleName);
+    if (role) categoryRoles.set(key, role);
+  }
+  const targetCategory = categoryForRank(groupRole.displayName);
+  const targetCategoryRole = targetCategory ? categoryRoles.get(targetCategory) : null;
+
+  for (const [key, role] of categoryRoles) {
+    if (key === "administracao" || role.id === targetCategoryRole?.id) continue;
+    if (!member.roles.cache.has(role.id) || isAdministratorRole(role)) continue;
+    if (!role.editable) {
+      warnings.push(`Não consegui tirar o cargo **${role.name}** (está acima do bot).`);
+      continue;
+    }
+    toRemove.push(role);
+  }
+
+  if (targetCategory && !targetCategoryRole) {
+    warnings.push(`Não encontrei no Discord o cargo de grupo "${CATEGORY_ROLE_NAMES[targetCategory]}".`);
+  } else if (targetCategoryRole && !member.roles.cache.has(targetCategoryRole.id)) {
+    if (isAdministratorRole(targetCategoryRole)) {
+      warnings.push(`O cargo **${targetCategoryRole.name}** tem permissão de Administrador, então o bot não entrega.`);
+    } else if (!targetCategoryRole.editable) {
+      warnings.push(`Não consegui dar o cargo **${targetCategoryRole.name}** (está acima do bot).`);
+    } else {
+      toAdd.push(targetCategoryRole);
     }
   }
 
