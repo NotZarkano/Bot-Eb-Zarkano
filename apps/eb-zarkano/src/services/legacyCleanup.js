@@ -11,7 +11,14 @@ export async function removeLegacyTicketPanel(client) {
     return;
   }
 
-  const channel = await client.channels.fetch(ticketsChannelId);
+  let channel;
+  try {
+    channel = await client.channels.fetch(ticketsChannelId);
+  } catch (error) {
+    // 10003 = o canal de tickets ja foi apagado: nao tem painel para limpar.
+    if (error.code === 10003) return;
+    throw error;
+  }
 
   if (!channel?.messages) {
     return;
