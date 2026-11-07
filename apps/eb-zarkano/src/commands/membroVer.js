@@ -4,8 +4,8 @@ import {
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
-import { getConfiguredRoleId } from "../config/roles.js";
 import { logAction } from "../services/auditLog.js";
+import { findMemberRole } from "../services/memberRole.js";
 
 export const data = new SlashCommandBuilder()
   .setName("membrover")
@@ -52,11 +52,11 @@ export async function execute(interaction) {
     return;
   }
 
-  const membroRoleId = getConfiguredRoleId("membro");
+  const membroRoleId = findMemberRole(interaction.guild)?.id;
   if (!membroRoleId) {
     await interaction.reply({
       content:
-        "O cargo Membro ainda não foi configurado em src/config/roles.js.",
+        'Não encontrei o cargo "Membro" no servidor.',
       ephemeral: true,
     });
     return;

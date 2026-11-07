@@ -47,6 +47,8 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
 ## Cargo Membro
 - Todo mundo no servidor tem o cargo Membro (`services/memberRole.js`): quem
   entra recebe na hora, e ao ligar o bot dá o Membro a quem ainda não tem.
+- O cargo é achado por `findMemberRole`: primeiro pelo ID em `config/roles.js`
+  e, se ele não existir mais, pelo nome "Membro" (sem emoji/acento).
 - Não existe mais "Membro Certificado" (o sistema de promover após 1 dia foi
   removido). `/membrover` e `/membrofalar` mexem só no cargo Membro.
 
