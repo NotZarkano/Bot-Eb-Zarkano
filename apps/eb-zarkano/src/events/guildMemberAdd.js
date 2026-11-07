@@ -1,3 +1,4 @@
+import { giveMemberRole } from "../services/memberRole.js";
 import { sendVerificationPrompt } from "../services/verificationSystem.js";
 import { sendWelcomeMessage } from "../services/welcomeMessage.js";
 
@@ -14,6 +15,12 @@ export async function handleGuildMemberAdd(member) {
   }
 
   recentWelcomeEvents.set(eventKey, now + DUPLICATE_WINDOW_MS);
+
+  try {
+    await giveMemberRole(member);
+  } catch (error) {
+    console.error("Não foi possível dar o cargo Membro:", error);
+  }
 
   try {
     const result = await sendWelcomeMessage({

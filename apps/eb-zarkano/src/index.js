@@ -9,10 +9,7 @@ import { handleVerificationButton } from "./handlers/verificationButtons.js";
 import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 import { shouldStartKeepAlive, startKeepAliveServer } from "./keepAlive.js";
 import { registerSlashCommands } from "./services/commandRegistration.js";
-import {
-  enforceRoleExclusivity,
-  startMembershipProgressionScheduler,
-} from "./services/membershipProgression.js";
+import { giveMemberRoleToEveryone } from "./services/memberRole.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
 import {
   ensurePingPanel,
@@ -69,7 +66,9 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.error("Não foi possível preparar o painel de pings:", error);
   }
 
-  startMembershipProgressionScheduler(readyClient);
+  giveMemberRoleToEveryone(readyClient).catch((error) => {
+    console.error("Não foi possível entregar o cargo Membro a todos:", error);
+  });
   startStaffActivityTracker(readyClient);
 });
 
@@ -85,13 +84,6 @@ client.on(Events.GuildEmojiDelete, () => schedulePingPanelRefreshNow(client));
 client.on(Events.GuildMemberAdd, handleGuildMemberAdd);
 client.on(Events.GuildMemberRemove, handleGuildMemberRemove);
 
-client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
-  try {
-    await enforceRoleExclusivity(newMember);
-  } catch (error) {
-    console.error("Não foi possível reforçar a exclusividade de cargos:", error);
-  }
-});
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (interaction.isModalSubmit()) {

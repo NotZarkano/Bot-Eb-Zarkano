@@ -53,12 +53,10 @@ export async function execute(interaction) {
   }
 
   const membroRoleId = getConfiguredRoleId("membro");
-  const membroCertificadoRoleId = getConfiguredRoleId("membroCertificado");
-
-  if (!membroRoleId || !membroCertificadoRoleId) {
+  if (!membroRoleId) {
     await interaction.reply({
       content:
-        "Os cargos de membro ainda não foram configurados em src/config/roles.js.",
+        "O cargo Membro ainda não foi configurado em src/config/roles.js.",
       ephemeral: true,
     });
     return;
@@ -86,16 +84,11 @@ export async function execute(interaction) {
   await channel.permissionOverwrites.edit(membroRoleId, nextPermissions, {
     reason,
   });
-  await channel.permissionOverwrites.edit(
-    membroCertificadoRoleId,
-    nextPermissions,
-    { reason },
-  );
 
   const newMode = isOpen ? "Fechado" : "Liberado (somente leitura)";
   const statusMessage = isOpen
     ? "🔒 Modo atual: **fechado**. Membros não podem ver este canal."
-    : "👁️ Modo atual: **apenas leitura**. Membros e membros certificados podem ver e ler o histórico, mas não podem enviar mensagens.";
+    : "👁️ Modo atual: **apenas leitura**. Membros podem ver e ler o histórico, mas não podem enviar mensagens.";
 
   await interaction.editReply({ content: statusMessage });
 

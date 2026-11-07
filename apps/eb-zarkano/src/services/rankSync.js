@@ -38,7 +38,7 @@ function checkCooldown(userId) {
 }
 
 // Cargos do Discord que representam patentes do grupo (mesmo nome, sem
-// sigla e sem acento). Membro, Membro Certificado e Staff nunca entram.
+// sigla e sem acento). Membro e Staff nunca entram.
 function findRankRoles(guild, groupRoles) {
   const groupRankNames = new Set(
     groupRoles
@@ -49,7 +49,6 @@ function findRankRoles(guild, groupRoles) {
   const protectedRoleIds = new Set(
     [
       getConfiguredRoleId("membro"),
-      getConfiguredRoleId("membroCertificado"),
       getConfiguredRoleId("staff"),
     ].filter(Boolean),
   );
@@ -169,10 +168,7 @@ export async function syncMember(interaction) {
   }
 
   const membroRoleId = getConfiguredRoleId("membro");
-  const membroCertificadoRoleId = getConfiguredRoleId("membroCertificado");
-  const hasMemberRole =
-    (membroRoleId && member.roles.cache.has(membroRoleId)) ||
-    (membroCertificadoRoleId && member.roles.cache.has(membroCertificadoRoleId));
+  const hasMemberRole = Boolean(membroRoleId && member.roles.cache.has(membroRoleId));
 
   if (membroRoleId && !hasMemberRole) {
     const membroRole = guild.roles.cache.get(membroRoleId);
