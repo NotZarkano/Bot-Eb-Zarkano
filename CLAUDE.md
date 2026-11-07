@@ -35,7 +35,7 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
 - Sincronizar: lê `discord_links` (`services/database.js`), busca a patente
   pela Open Cloud v2 (`services/robloxGroup.js`), tira cargos de outras
   patentes, dá o cargo com o mesmo nome (sem sigla/acento), dá Membro se não
-  tiver Membro nem Membro Certificado, e põe o apelido `[SIGLA] usuario`
+  tiver, e põe o apelido `[SIGLA] usuario`
   (máx. 32; "Criador" vira CRIADOR). Cooldown de 20s por pessoa.
 - Cargo de grupo (`utils/rankCategories.js`): Praças, Praças Especiais,
   Graduados, Oficiais Inferiores/Intermediários/Superiores/Generais (mesma
@@ -43,6 +43,12 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   Administrativa. Achados pelo nome no Discord. Sincronizar dá o certo e tira
   os outros grupos; "Equipe Administrativa" o bot só dá, nunca tira.
 - Regra fixa: nunca dar nem tirar cargo com permissão de Administrador.
+
+## Cargo Membro
+- Todo mundo no servidor tem o cargo Membro (`services/memberRole.js`): quem
+  entra recebe na hora, e ao ligar o bot dá o Membro a quem ainda não tem.
+- Não existe mais "Membro Certificado" (o sistema de promover após 1 dia foi
+  removido). `/membrover` e `/membrofalar` mexem só no cargo Membro.
 
 ## Relatório de inatividade da staff
 - `services/staffActivity.js`: guarda a última mensagem de quem tem o cargo
