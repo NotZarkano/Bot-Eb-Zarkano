@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { getConfig } from "../config.js";
 import { getConfiguredRoleId } from "../config/roles.js";
 import { CATEGORY_ROLE_NAMES, categoryForRank } from "../utils/rankCategories.js";
+import { findMemberRole } from "./memberRole.js";
 import { buildNickname, normalizeRankName } from "../utils/rankNames.js";
 import { findDiscordLink, LinkSystemInactiveError } from "./database.js";
 import { fetchGroupRoles, fetchMemberGroupRole } from "./robloxGroup.js";
@@ -48,7 +49,7 @@ function findRankRoles(guild, groupRoles) {
   );
   const protectedRoleIds = new Set(
     [
-      getConfiguredRoleId("membro"),
+      findMemberRole(guild)?.id,
       getConfiguredRoleId("staff"),
     ].filter(Boolean),
   );
@@ -167,15 +168,12 @@ export async function syncMember(interaction) {
     }
   }
 
-  const membroRoleId = getConfiguredRoleId("membro");
-  const hasMemberRole = Boolean(membroRoleId && member.roles.cache.has(membroRoleId));
+  const membroRole = findMemberRole(guild);
 
-  if (membroRoleId && !hasMemberRole) {
-    const membroRole = guild.roles.cache.get(membroRoleId);
-
-    if (!membroRole) {
-      warnings.push("O cargo Membro configurado não existe mais no servidor.");
-    } else if (isAdministratorRole(membroRole)) {
+  if (!membroRole) {
+    warnings.push('Não encontrei no servidor o cargo "Membro".');
+  } else if (!member.roles.cache.has(membroRole.id)) {
+    if (isAdministratorRole(membroRole)) {
       warnings.push("O cargo Membro tem permissão de Administrador, então o bot não entrega.");
     } else if (!membroRole.editable) {
       warnings.push(`Não consegui dar o cargo **${membroRole.name}** (está acima do bot).`);

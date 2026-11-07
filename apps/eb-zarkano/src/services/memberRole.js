@@ -1,13 +1,24 @@
 import { PermissionFlagsBits } from "discord.js";
 import { getConfiguredRoleId } from "../config/roles.js";
+import { normalizeRankName } from "../utils/rankNames.js";
+
+// Acha o cargo Membro: primeiro pelo ID de src/config/roles.js e, se ele não
+// existir mais (cargo apagado e criado de novo), pelo nome "Membro".
+export function findMemberRole(guild) {
+  const roleId = getConfiguredRoleId("membro");
+  return (
+    (roleId && guild.roles.cache.get(roleId)) ||
+    guild.roles.cache.find((role) => normalizeRankName(role.name) === "membro") ||
+    null
+  );
+}
 
 // Todo mundo que está no servidor tem o cargo Membro.
 function getMemberRole(guild) {
-  const roleId = getConfiguredRoleId("membro");
-  const role = roleId ? guild.roles.cache.get(roleId) : null;
+  const role = findMemberRole(guild);
 
   if (!role) {
-    console.warn("Cargo Membro não encontrado. Confira roleIds.membro em src/config/roles.js.");
+    console.warn('Cargo "Membro" não encontrado no servidor. Crie um cargo com esse nome.');
     return null;
   }
   if (role.permissions.has(PermissionFlagsBits.Administrator) || !role.editable) {
