@@ -6,6 +6,18 @@ let pool = null;
 
 export class LinkSystemInactiveError extends Error {}
 
+// O "sslmode" do link do Neon faz a biblioteca pg mostrar um aviso no
+// console. O SSL ja e ligado pela opcao "ssl" abaixo, entao tiramos do link.
+function connectionStringWithoutSslMode(connectionString) {
+  try {
+    const url = new URL(connectionString);
+    url.searchParams.delete("sslmode");
+    return url.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 function getPool() {
   if (!process.env.DATABASE_URL) {
     throw new LinkSystemInactiveError("DATABASE_URL não configurada.");
@@ -13,7 +25,7 @@ function getPool() {
 
   if (!pool) {
     pool = new pg.Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: connectionStringWithoutSslMode(process.env.DATABASE_URL),
       ssl: { rejectUnauthorized: false },
       max: 3,
     });
