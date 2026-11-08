@@ -1,4 +1,3 @@
-import { PermissionFlagsBits } from "discord.js";
 import { getConfig } from "../config.js";
 import { getConfiguredRoleId } from "../config/roles.js";
 import { CATEGORY_ROLE_NAMES, categoryForRank } from "../utils/rankCategories.js";
@@ -12,9 +11,6 @@ const lastSyncByUser = new Map();
 
 const SITE_URL = "https://ebzarkano.onrender.com";
 
-function isAdministratorRole(role) {
-  return role.permissions.has(PermissionFlagsBits.Administrator);
-}
 
 // Retorna quantos segundos faltam, ou 0 se já pode sincronizar.
 function checkCooldown(userId) {
@@ -142,9 +138,6 @@ export async function syncMember(interaction) {
     if (!rankRoles.has(role.id) || role.id === targetRole?.id) {
       continue;
     }
-    if (isAdministratorRole(role)) {
-      continue;
-    }
     if (!role.editable) {
       warnings.push(`Não consegui tirar o cargo **${role.name}** (está acima do bot).`);
       continue;
@@ -157,11 +150,7 @@ export async function syncMember(interaction) {
       `Não encontrei no Discord um cargo com o nome da patente **${groupRole.displayName}**.`,
     );
   } else if (!member.roles.cache.has(targetRole.id)) {
-    if (isAdministratorRole(targetRole)) {
-      warnings.push(
-        `O cargo **${targetRole.name}** tem permissão de Administrador, então o bot não entrega. Peça a um administrador.`,
-      );
-    } else if (!targetRole.editable) {
+    if (!targetRole.editable) {
       warnings.push(`Não consegui dar o cargo **${targetRole.name}** (está acima do bot).`);
     } else {
       toAdd.push(targetRole);
@@ -173,9 +162,7 @@ export async function syncMember(interaction) {
   if (!membroRole) {
     warnings.push('Não encontrei no servidor o cargo "Membro".');
   } else if (!member.roles.cache.has(membroRole.id)) {
-    if (isAdministratorRole(membroRole)) {
-      warnings.push("O cargo Membro tem permissão de Administrador, então o bot não entrega.");
-    } else if (!membroRole.editable) {
+    if (!membroRole.editable) {
       warnings.push(`Não consegui dar o cargo **${membroRole.name}** (está acima do bot).`);
     } else {
       toAdd.push(membroRole);
@@ -195,7 +182,7 @@ export async function syncMember(interaction) {
 
   for (const [key, role] of categoryRoles) {
     if (key === "administracao" || role.id === targetCategoryRole?.id) continue;
-    if (!member.roles.cache.has(role.id) || isAdministratorRole(role)) continue;
+    if (!member.roles.cache.has(role.id)) continue;
     if (!role.editable) {
       warnings.push(`Não consegui tirar o cargo **${role.name}** (está acima do bot).`);
       continue;
@@ -206,9 +193,7 @@ export async function syncMember(interaction) {
   if (targetCategory && !targetCategoryRole) {
     warnings.push(`Não encontrei no Discord o cargo de grupo "${CATEGORY_ROLE_NAMES[targetCategory]}".`);
   } else if (targetCategoryRole && !member.roles.cache.has(targetCategoryRole.id)) {
-    if (isAdministratorRole(targetCategoryRole)) {
-      warnings.push(`O cargo **${targetCategoryRole.name}** tem permissão de Administrador, então o bot não entrega.`);
-    } else if (!targetCategoryRole.editable) {
+    if (!targetCategoryRole.editable) {
       warnings.push(`Não consegui dar o cargo **${targetCategoryRole.name}** (está acima do bot).`);
     } else {
       toAdd.push(targetCategoryRole);
