@@ -101,6 +101,13 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   Botões antigos sem dono respondem "Esse botão foi desativado".
 
 ## Deploy na Square Cloud
+- **Automático:** `.github/workflows/deploy-bot-squarecloud.yml` (GitHub Action
+  oficial `squarecloudofc/github-action@v2`) roda a cada push na `main` que
+  mexe em `apps/eb-zarkano/`: envia a pasta do bot (`workdir`) para a app
+  `29f0c54bcc784191a0fc0b92e678a4cd` com `commit --restart`. Precisa do
+  segredo `SQUARECLOUD_API_KEY` no GitHub; sem ele o deploy é pulado.
+  Exclusões do envio: `apps/eb-zarkano/squarecloud.ignore`.
+- O zip manual abaixo continua valendo como plano B.
 - `apps/eb-zarkano/squarecloud.app`: config da Square Cloud (`MAIN=src/index.js`,
   `MEMORY=512`, `AUTORESTART=true`). Fica na raiz do zip, ao lado do package.json.
 - `npm run pack:squarecloud` (dentro de `apps/eb-zarkano`) gera

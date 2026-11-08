@@ -1,0 +1,39 @@
+# Atualiza o bot na Square Cloud sozinho toda vez que algo do bot entra na
+# main. Precisa do segredo SQUARECLOUD_API_KEY no GitHub (Settings > Secrets
+# and variables > Actions). Sem ele, o deploy e pulado sem dar erro.
+name: Deploy do bot na Square Cloud
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/eb-zarkano/**"
+      - ".github/workflows/deploy-bot-squarecloud.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-bot-squarecloud
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SQUARECLOUD_API_KEY: ${{ secrets.SQUARECLOUD_API_KEY }}
+      # ID da aplicacao "EB Zarkano Bot" na Square Cloud (nao e segredo).
+      SQUARECLOUD_APP_ID: 29f0c54bcc784191a0fc0b92e678a4cd
+    steps:
+      - name: Avisar se falta a chave da Square Cloud
+        if: env.SQUARECLOUD_API_KEY == ''
+        run: echo "::warning::Falta o segredo SQUARECLOUD_API_KEY. Deploy pulado."
+
+      - uses: actions/checkout@v4
+        if: env.SQUARECLOUD_API_KEY != ''
+
+      - name: Enviar o bot e reiniciar
+        if: env.SQUARECLOUD_API_KEY != ''
+        uses: squarecloudofc/github-action@v2
+        with:
+          token: ${{ secrets.SQUARECLOUD_API_KEY }}
+          workdir: apps/eb-zarkano
+          command: commit ${{ env.SQUARECLOUD_APP_ID }} --restart
