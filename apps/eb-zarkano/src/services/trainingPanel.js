@@ -50,13 +50,7 @@ function createTrainingPanelPayload() {
     .setColor(EB_ZARKANO_GREEN)
     .setTitle("📚 Scripts de Treinamento")
     .setDescription(
-      [
-        "Escolha abaixo o treinamento que você vai aplicar para receber o roteiro de como ele deve ser feito.",
-        "",
-        ...TRAININGS.map((t) => `${t.emoji} **${t.label}** — liberado para ${t.publico}`),
-        "",
-        "*Cada roteiro só abre para quem tem a patente mínima.*",
-      ].join("\n"),
+      "Escolha abaixo o treinamento que você vai aplicar para receber o roteiro de como ele deve ser feito.",
     )
     .setFooter({ text: TRAINING_PANEL_FOOTER });
 
