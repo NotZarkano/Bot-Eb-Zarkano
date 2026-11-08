@@ -73,6 +73,16 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   ficam em `EMOJI_ALIASES` (ex.: BAC -> :comandos:). Mudar emojis também
   atualiza o painel (intent GuildExpressions).
 
+## Painel de scripts de treinamento
+- `services/trainingPanel.js`: painel no canal `treinamentos` (rodapé
+  "EB Zarkano • Scripts de treinamento"). Cada botão manda (só para quem
+  clicou) um embed com o link do documento do treinamento.
+- Lista em `TRAININGS` (nome, emoji, link e quem pode ver). Quem pode ver é
+  conferido pelos cargos de grupo do Discord (os da sincronização):
+  "Praças e Graduados" para Oficiais ou acima; "Oficiais" para Generais ou
+  acima. Patentes Honorárias, Equipe Administrativa e quem tem Administrador
+  no Discord veem tudo.
+
 ## Comando /cdp
 - `commands/cdp.js` + `services/cdp.js`: mostra a CDP de quem usou (ou de
   outro membro, opção `membro`): barra de progresso, quanto falta (horas e

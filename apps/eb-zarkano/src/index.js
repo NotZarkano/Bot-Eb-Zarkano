@@ -10,6 +10,7 @@ import { handleWelcomeButton } from "./handlers/welcomeButtons.js";
 import { shouldStartKeepAlive, startKeepAliveServer } from "./keepAlive.js";
 import { registerSlashCommands } from "./services/commandRegistration.js";
 import { giveMemberRoleToEveryone } from "./services/memberRole.js";
+import { ensureTrainingPanel, handleTrainingButton } from "./services/trainingPanel.js";
 import { ensureInformationPanel } from "./services/informationSystem.js";
 import {
   ensurePingPanel,
@@ -64,6 +65,12 @@ client.once(Events.ClientReady, async (readyClient) => {
     await ensurePingPanel(readyClient);
   } catch (error) {
     console.error("Não foi possível preparar o painel de pings:", error);
+  }
+
+  try {
+    await ensureTrainingPanel(readyClient);
+  } catch (error) {
+    console.error("Não foi possível preparar o painel de treinamentos:", error);
   }
 
   giveMemberRoleToEveryone(readyClient).catch((error) => {
@@ -121,6 +128,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const informationButtonHandled = await handleInformationButton(interaction);
 
       if (informationButtonHandled) {
+        return;
+      }
+
+      const trainingButtonHandled = await handleTrainingButton(interaction);
+
+      if (trainingButtonHandled) {
         return;
       }
 
