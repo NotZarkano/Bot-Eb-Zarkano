@@ -42,7 +42,11 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   divisão da CDP), Marechal -> Patentes Honorárias, administração -> Equipe
   Administrativa. Achados pelo nome no Discord. Sincronizar dá o certo e tira
   os outros grupos; "Equipe Administrativa" o bot só dá, nunca tira.
-- Regra fixa: nunca dar nem tirar cargo com permissão de Administrador.
+- A sincronização dá e tira cargos de patente/grupo mesmo que tenham
+  permissão de Administrador (pedido do dono, nov/2026): quem está numa
+  patente de administração no Roblox ganha esse cargo no Discord. Continua
+  valendo o limite do Discord (o cargo precisa estar abaixo do bot). O cargo
+  Membro e os pings nunca são entregues se tiverem Administrador.
 
 ## Cargo Membro
 - Todo mundo no servidor tem o cargo Membro (`services/memberRole.js`): quem
