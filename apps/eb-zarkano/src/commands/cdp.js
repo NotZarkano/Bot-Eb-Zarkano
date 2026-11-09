@@ -26,6 +26,20 @@ function formatRemaining(ms) {
   return `${text} (${totalMinutes} minuto${totalMinutes === 1 ? "" : "s"})`;
 }
 
+function formatHours(hours) {
+  const whole = Math.floor(hours);
+  const minutes = Math.round((hours - whole) * 60);
+  return minutes ? `${whole}h ${minutes}min` : `${whole} horas`;
+}
+
+function cdpField(status) {
+  return {
+    name: "CDP da patente",
+    value: status.vip ? `${formatHours(status.hours)} ⭐ VIP (metade)` : formatHours(status.hours),
+    inline: true,
+  };
+}
+
 function progressBar(progress) {
   const filled = Math.round(progress * 12);
   return `${"🟩".repeat(filled)}${"⬛".repeat(12 - filled)} ${Math.floor(progress * 100)}%`;
@@ -109,7 +123,7 @@ export async function execute(interaction) {
       .setColor(EB_ZARKANO_GOLD)
       .setDescription(progressBar(status.progress))
       .addFields(
-        { name: "CDP da patente", value: `${status.hours} horas`, inline: true },
+        cdpField(status),
         { name: "Faltam", value: formatRemaining(status.remainingMs), inline: false },
         { name: "Libera em", value: `<t:${releaseUnix}:f> (<t:${releaseUnix}:R>)`, inline: false },
       );
@@ -117,7 +131,7 @@ export async function execute(interaction) {
     embed
       .setColor(EB_ZARKANO_GREEN)
       .setDescription(`${progressBar(1)}\n✅ CDP cumprida! Já pode ser promovido.`)
-      .addFields({ name: "CDP da patente", value: `${status.hours} horas`, inline: true });
+      .addFields(cdpField(status));
   }
 
   await interaction.editReply({ embeds: [embed] });

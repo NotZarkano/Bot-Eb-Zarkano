@@ -35,6 +35,33 @@ function normalizeCdpName(name) {
     .trim();
 }
 
+// Gamepass VIP: quem tem faz só METADE do tempo (mesmo número do site).
+// https://www.roblox.com/game-pass/2054232226/VIP
+const VIP_GAMEPASS_ID = 2054232226;
+
+// Cache: tem VIP -> 6 horas; não tem -> 5 minutos (pode ter acabado de comprar).
+const vipCache = new Map();
+
+async function hasVip(robloxId) {
+  const cached = vipCache.get(String(robloxId));
+  if (cached && Date.now() < cached.expiresAt) return cached.vip;
+  try {
+    const response = await fetch(
+      `https://inventory.roblox.com/v1/users/${robloxId}/items/1/${VIP_GAMEPASS_ID}/is-owned`,
+    );
+    if (!response.ok) throw new Error(`status ${response.status}`);
+    const vip = (await response.json()) === true;
+    vipCache.set(String(robloxId), {
+      vip,
+      expiresAt: Date.now() + (vip ? 6 * 60 : 5) * 60 * 1000,
+    });
+    return vip;
+  } catch (error) {
+    console.error("Não consegui conferir o VIP da CDP:", error.message);
+    return cached ? cached.vip : false;
+  }
+}
+
 const HOURS_BY_RANK = new Map(
   CDP_HOURS.map(([name, hours]) => [normalizeCdpName(name), hours]),
 );
@@ -71,11 +98,14 @@ async function getSinceInRank(robloxId, roleId) {
 
 // Situação da CDP. `groupRole` vem da Open Cloud ({ id, displayName }).
 export async function getCdpStatus(robloxId, groupRole) {
-  const hours = getCdpHours(groupRole.displayName);
+  const normalHours = getCdpHours(groupRole.displayName);
 
-  if (hours === null) {
+  if (normalHours === null) {
     return { hasCdp: false };
   }
+
+  const vip = await hasVip(robloxId);
+  const hours = vip ? normalHours / 2 : normalHours;
 
   const since = await getSinceInRank(robloxId, groupRole.id);
   const totalMs = hours * 60 * 60 * 1000;
@@ -86,6 +116,7 @@ export async function getCdpStatus(robloxId, groupRole) {
     hasCdp: true,
     inCdp: remainingMs > 0,
     hours,
+    vip,
     since,
     releaseAt,
     remainingMs,
