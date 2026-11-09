@@ -94,6 +94,8 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
 - A regra e a tabela de horas são uma CÓPIA do `cdp.js` do site, usando as
   mesmas tabelas (`cdp_patente`, `site_config`). Mudou os tempos no site?
   Mude aqui também.
+- Gamepass VIP (`VIP_GAMEPASS_ID` = 2054232226, mesmo do site): quem tem faz
+  metade do tempo (API pública `inventory.roblox.com/.../is-owned`, cache).
 
 ## Comandos de barra
 - O bot registra os comandos sozinho ao ligar (`services/commandRegistration.js`).
