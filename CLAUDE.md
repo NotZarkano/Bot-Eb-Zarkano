@@ -83,6 +83,7 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   clicou) um embed com o link do documento do treinamento.
 - Lista em `TRAININGS` (nome, emoji, link e quem pode ver). Quem pode ver é
   conferido pelos cargos de grupo do Discord (os da sincronização):
+  "Recrutamento" para Graduados ou acima (inclui Cadete);
   "Praças e Graduados" para Oficiais ou acima; "Oficiais" para Generais ou
   acima. Patentes Honorárias, Equipe Administrativa e quem tem Administrador
   no Discord veem tudo.

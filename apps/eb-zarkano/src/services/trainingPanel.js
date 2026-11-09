@@ -14,6 +14,17 @@ const TRAINING_PANEL_FOOTER = "EB Zarkano • Scripts de treinamento";
 const TRAINING_BUTTON_PREFIX = "treino:";
 
 // Cargos de grupo (dados pela sincronização) em ordem crescente.
+// Cadete (Praças Especiais) fica acima dos Graduados na hierarquia.
+const GRADUADOS_OU_MAIS = [
+  "graduados",
+  "pracasEspeciais",
+  "oficiaisInferiores",
+  "oficiaisIntermediarios",
+  "oficiaisSuperiores",
+  "oficiaisGenerais",
+  "honorarias",
+  "administracao",
+];
 const OFICIAIS_OU_MAIS = [
   "oficiaisInferiores",
   "oficiaisIntermediarios",
@@ -27,6 +38,14 @@ const GENERAIS_OU_MAIS = ["oficiaisGenerais", "honorarias", "administracao"];
 // >>> Scripts de treinamento. Para adicionar um novo, copie um bloco.
 // grupos: cargos de grupo do Discord que podem ver o script.
 const TRAININGS = [
+  {
+    id: "recrutamento",
+    label: "Recrutamento",
+    emoji: "📋",
+    publico: "Graduados ou acima",
+    grupos: GRADUADOS_OU_MAIS,
+    url: "https://docs.google.com/document/d/1oDSdZhQA0Kw5fRUuGfeaB8WPrLplI1WUBVvZA7fn2aE/edit?usp=sharing",
+  },
   {
     id: "pracas-graduados",
     label: "Praças e Graduados",
