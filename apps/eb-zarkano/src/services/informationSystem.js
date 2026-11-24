@@ -14,9 +14,11 @@ export const informationButtonIds = Object.freeze({
   game: "information:game",
 });
 
-const informationLinks = Object.freeze({
+export const informationLinks = Object.freeze({
   ebWebsite: "https://ebzarkano.onrender.com",
   robloxGroup: "https://www.roblox.com/share/g/7797329",
+  // Página do jogo no Roblox (botão "Jogo" do painel de informações).
+  robloxGame: "https://www.roblox.com/pt/games/110177402189012/Ex-rcito-Brasileiro-Zarkano",
 });
 
 function createLinkButton(label, emoji, url) {
@@ -38,11 +40,7 @@ function createNavigationButtons() {
         .setEmoji("☑️")
         .setStyle(ButtonStyle.Link)
         .setURL(informationLinks.robloxGroup),
-      new ButtonBuilder()
-        .setCustomId(informationButtonIds.game)
-        .setLabel("Jogo")
-        .setEmoji("🎮")
-        .setStyle(ButtonStyle.Secondary),
+      createLinkButton("Jogo", "🎮", informationLinks.robloxGame),
     ),
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
