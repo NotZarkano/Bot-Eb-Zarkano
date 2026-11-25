@@ -98,6 +98,15 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
 - Gamepass VIP (`VIP_GAMEPASS_ID` = 2054232226, mesmo do site): quem tem faz
   metade do tempo (API pública `inventory.roblox.com/.../is-owned`, cache).
 
+## Comando /modosuspensao
+- `commands/modoSuspensao.js`: apaga TODOS os canais do servidor, menos o
+  chat (`1543434264983379968`), os anúncios gerais (`1543335341916950579`)
+  e as categorias deles (`CANAIS_MANTIDOS`). Não dá para desfazer.
+- Só o dono do servidor; pede confirmação num botão (1 min). Se um dos dois
+  canais não existir, não apaga nada. Antes de apagar, manda no privado do
+  dono um `canais-apagados.json` (nome, tipo, categoria, permissões); o
+  resultado (e o que não deu para apagar) também vai no privado.
+
 ## Comandos de barra
 - O bot registra os comandos sozinho ao ligar (`services/commandRegistration.js`).
   `npm run register` continua funcionando para registrar à mão.

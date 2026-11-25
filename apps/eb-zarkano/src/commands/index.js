@@ -5,6 +5,7 @@ import * as limpar from "./limpar.js";
 import * as lockChannel from "./lockChannel.js";
 import * as membroFalar from "./membroFalar.js";
 import * as membroVer from "./membroVer.js";
+import * as modoSuspensao from "./modoSuspensao.js";
 import * as patente from "./patente.js";
 import * as testWelcome from "./testWelcome.js";
 
@@ -16,6 +17,7 @@ export const commands = new Map([
   [lockChannel.data.name, lockChannel],
   [membroFalar.data.name, membroFalar],
   [membroVer.data.name, membroVer],
+  [modoSuspensao.data.name, modoSuspensao],
   [patente.data.name, patente],
   [testWelcome.data.name, testWelcome],
 ]);
