@@ -118,9 +118,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.isButton()) {
-    // Botões que o próprio comando espera (ex.: confirmar do /modosuspensao):
-    // quem responde é o comando, não este roteador.
-    if (interaction.customId.startsWith("modosuspensao:")) {
+    // Botões que o próprio comando espera (ex.: confirmar do /modosuspensao
+    // e do /suspensaocargos): quem responde é o comando, não este roteador.
+    if (/^(modosuspensao|suspensaocargos):/.test(interaction.customId)) {
       return;
     }
 
