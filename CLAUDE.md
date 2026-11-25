@@ -107,6 +107,18 @@ O repositório é um monorepo pnpm herdado do Replit (`artifacts/`, `lib/`,
   dono um `canais-apagados.json` (nome, tipo, categoria, permissões); o
   resultado (e o que não deu para apagar) também vai no privado.
 
+## Comando /suspensaocargos
+- `commands/suspensaoCargos.js`: apaga TODOS os cargos que o bot consegue
+  apagar (o Discord não deixa: @everyone, cargos de bot/integração/impulso e
+  cargos acima do cargo do bot). Não dá para desfazer.
+- Mesmas travas do /modosuspensao: só o dono do servidor, confirmação num
+  botão (1 min), `cargos-apagados.json` (nome, cor, permissões...) e o
+  resultado no privado do dono.
+- O roteador de botões do `index.js` ignora `modosuspensao:*` e
+  `suspensaocargos:*` (quem responde é o próprio comando).
+- Depois dele, cargos que o bot usa (Membro, patentes, grupos, pings) somem;
+  recriar com os mesmos nomes faz o bot voltar a achar (ele procura pelo nome).
+
 ## Comandos de barra
 - O bot registra os comandos sozinho ao ligar (`services/commandRegistration.js`).
   `npm run register` continua funcionando para registrar à mão.
