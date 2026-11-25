@@ -118,6 +118,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.isButton()) {
+    // Botões que o próprio comando espera (ex.: confirmar do /modosuspensao):
+    // quem responde é o comando, não este roteador.
+    if (interaction.customId.startsWith("modosuspensao:")) {
+      return;
+    }
+
     try {
       const welcomeButtonHandled = await handleWelcomeButton(interaction);
 
